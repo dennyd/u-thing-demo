@@ -26,30 +26,57 @@ public class MapGenerator : MonoBehaviour
 
 	void Start ()
 	{
+		float t0 = System.DateTime.Now.Millisecond;
+		float t1 = System.DateTime.Now.Millisecond;
+		Debug.Log ("generate map exec time:" + (t1-t0));
+
 		GenerateMap ();
+		GenerateMesh ();
+
+
+
+
+
+	}
+
+	void Update ()
+	{
+		if (Input.GetMouseButtonDown (0)) {
+			GenerateMap ();
+			GenerateMesh ();
+		}
+	}
+
+	void GenerateMap ()
+	{
+		map = new int[width, height];
+		RandomFillMap ();
+
+		for (int i = 0; i < 5; i++) {
+			SmoothMap ();
+		}
+	}
+
+
+	void GenerateMesh ()
+	{
 		mesh = new Mesh ();
 		GetComponent<MeshFilter> ().mesh = mesh;
 		mesh.name = "Procedural Grid";
 
+		// creating vertices for the mesh
 		vertices = new Vector3[(width + 1) * (height + 1)];
-
-
 		for (int v = 0, i = 0; i <= width; i++) {
 			for (int j = 0; j <= height; j++, v++) {
 				vertices [v] = new Vector3 (i, 0, j);
 			}
 		}
-
-
 		mesh.vertices = vertices;
 
-	
+		// triangulating mesh
 		int[] triangles = new int[(width) * (height) * 6];
-
 		for (int t = 0, v = 0, j = 0; j < width; j++, v++) {
-
 			for (int i = 0; i < height; i++,t += 6, v++) {
-
 				triangles [t] = v;
 				triangles [t + 1] = v + 1;
 				triangles [t + 2] = v + height + 1;
@@ -58,45 +85,34 @@ public class MapGenerator : MonoBehaviour
 				triangles [t + 4] = v + height + 2;
 				triangles [t + 5] = v + height + 1;
 			}
-
 		}
-			
 
 		mesh.triangles = triangles;
 
-
-		Debug.Log (vertices.Length);
-		Debug.Log (width*height);
-
+		// mesh coloring
 		Vector3[] vert = mesh.vertices;
-		//coloring
 		Color[] colors = new Color[vert.Length];
 		for (int i = 0; i < vert.Length; i++) {
 			Vector3 v = vert[i];
 
-			Debug.Log ((int)Math.Floor( v.x) + " " + ((int) Math.Floor(v.z)));
-
 			int x = (int)Math.Floor (v.x);
 			int z = (int)Math.Floor (v.z);
 			if(x>=0 && x< width && z>=0 && z<height){
-
 				if (map[x,z] == 1) {
 					colors[i] = Color.Lerp(Color.red, Color.green, 0.3f);
 				} else {
 					colors[i] = Color.Lerp(Color.red, Color.green, 0.7f);
 				}
-		
 			}
-
-
-
 		}
-
 		mesh.colors = colors;
 
+		// addding colider to the mesh	
+		MeshCollider mc = gameObject.GetComponent<MeshCollider>();
+		if (mc == null) {
+			mc = gameObject.AddComponent<MeshCollider> ();
+		}
 
-
-		MeshCollider mc = gameObject.AddComponent<MeshCollider> ();
 		mc.sharedMesh = mesh;
 
 		// texture, uvs etc
@@ -112,24 +128,10 @@ public class MapGenerator : MonoBehaviour
 
 
 
+
+
 	}
 
-	void Update ()
-	{
-		if (Input.GetMouseButtonDown (0)) {
-			GenerateMap ();
-		}
-	}
-
-	void GenerateMap ()
-	{
-		map = new int[width, height];
-		RandomFillMap ();
-
-		for (int i = 0; i < 5; i++) {
-			SmoothMap ();
-		}
-	}
 
 
 	void RandomFillMap ()
