@@ -16,10 +16,19 @@ public class MapGenerator : MonoBehaviour
 	public string seed;
 	public bool useRandomSeed;
 
-	[Range (0, 100)]
-	public int randomFillPercent;
+	//	[Range (0, 100)]
+	//	public int randomFillPercent;
+	//
 
-	int[,] map;
+	public float noiseLevel;
+	public float noiseScale;
+	[Range (0, 100)]
+	public float meshScale;
+
+	float[,] map;
+	float mapLowestVal=0;
+	float mapHighestVal=0;
+
 
 	private Vector3[] vertices;
 
@@ -28,12 +37,14 @@ public class MapGenerator : MonoBehaviour
 	{
 		float t0 = System.DateTime.Now.Millisecond;
 		float t1 = System.DateTime.Now.Millisecond;
-		Debug.Log ("generate map exec time:" + (t1-t0));
+		Debug.Log ("generate map exec time:" + (t1 - t0));
 
 		GenerateMap ();
 		GenerateMesh ();
 
-
+//		Debug.Log (Mathf.PerlinNoise(1.1f,1.1f));
+//		Debug.Log (Mathf.PerlinNoise(2.1f,1.1f));
+//		Debug.Log (Mathf.PerlinNoise(2.1f,2.1f));
 
 
 
@@ -49,14 +60,54 @@ public class MapGenerator : MonoBehaviour
 
 	void GenerateMap ()
 	{
-		map = new int[width, height];
-		RandomFillMap ();
+		map = new float[width+1, height+1];
+		float seed = 0;
+		if(useRandomSeed){
+			seed = Time.time;
 
-		for (int i = 0; i < 5; i++) {
-			SmoothMap ();
 		}
+		GenerateNoise (seed, noiseScale, noiseLevel);
+		NormaliseMap ();
+
+
 	}
 
+
+	void NormaliseMap(){
+		float[,] normalMap = new float[width+1, height+1];
+		for (int x = 0; x <= width; x++) {
+			for (int y = 0; y <= height; y++) {
+				normalMap [x, y] = (map[x,y]-mapLowestVal)/(mapHighestVal-mapLowestVal) ;
+			}
+		}
+		map = normalMap;
+	}
+
+
+	void GenerateNoise (float seed,float scale, float level)
+	{
+		float border = 10.0f;
+		for (int x = 0; x <= width; x++) {
+			for (int y = 0; y <= height; y++) {
+				if (x == 0 || x == width || y == 0 || y == height) {
+					map [x, y] = border;
+				} else {
+
+					// todo: optimization
+					map [x, y] = (Mathf.PerlinNoise (seed + x/scale, seed+ y/scale)) * level;
+					if(map [x, y]>mapHighestVal){
+						mapHighestVal = map [x, y];
+					}
+
+					if(map [x, y]< mapLowestVal){
+						mapLowestVal = map [x, y];
+					}
+//
+				}
+			}
+		}
+
+	}
 
 	void GenerateMesh ()
 	{
@@ -65,12 +116,26 @@ public class MapGenerator : MonoBehaviour
 		mesh.name = "Procedural Grid";
 
 		// creating vertices for the mesh
+
 		vertices = new Vector3[(width + 1) * (height + 1)];
 		for (int v = 0, i = 0; i <= width; i++) {
 			for (int j = 0; j <= height; j++, v++) {
-				vertices [v] = new Vector3 (i, 0, j);
+				float y = map[i,j] * meshScale;
+				vertices [v] = new Vector3 (i, y, j);
 			}
 		}
+
+
+		// set y-axis according to heat map
+
+//		for (int x = 0; x < width; x++) {
+//			for (int y = 0; y < height; y++) {
+//				vertices [x * y].y = map [x, y];
+//			}
+//		}
+
+
+
 		mesh.vertices = vertices;
 
 		// triangulating mesh
@@ -93,22 +158,23 @@ public class MapGenerator : MonoBehaviour
 		Vector3[] vert = mesh.vertices;
 		Color[] colors = new Color[vert.Length];
 		for (int i = 0; i < vert.Length; i++) {
-			Vector3 v = vert[i];
+			Vector3 v = vert [i];
 
 			int x = (int)Math.Floor (v.x);
 			int z = (int)Math.Floor (v.z);
-			if(x>=0 && x< width && z>=0 && z<height){
-				if (map[x,z] == 1) {
-					colors[i] = Color.Lerp(Color.red, Color.green, 0.3f);
-				} else {
-					colors[i] = Color.Lerp(Color.red, Color.green, 0.7f);
-				}
+			if (x >= 0 && x < width && z >= 0 && z < height) {
+//				if (map[x,z] == 1) {
+//					colors[i] = Color.Lerp(Color.red, Color.green, 0.3f);
+//				} else {
+//					colors[i] = Color.Lerp(Color.red, Color.green, 0.7f);
+//				}
+				colors [i] = Color.Lerp (Color.blue, Color.red, map [x, z]);
 			}
 		}
 		mesh.colors = colors;
 
 		// addding colider to the mesh	
-		MeshCollider mc = gameObject.GetComponent<MeshCollider>();
+		MeshCollider mc = gameObject.GetComponent<MeshCollider> ();
 		if (mc == null) {
 			mc = gameObject.AddComponent<MeshCollider> ();
 		}
@@ -119,73 +185,73 @@ public class MapGenerator : MonoBehaviour
 		int tileAmount = 6;
 		float squareSize = 2;
 		Vector2[] uvs = new Vector2[vertices.Length];
-		for (int i =0; i < vertices.Length; i ++) {
-			float percentX = Mathf.InverseLerp(-map.GetLength(0)/2*squareSize,map.GetLength(0)/2*squareSize,vertices[i].x) * tileAmount;
-			float percentY = Mathf.InverseLerp(-map.GetLength(0)/2*squareSize,map.GetLength(0)/2*squareSize,vertices[i].z) * tileAmount;
-			uvs[i] = new Vector2(percentX,percentY);
+		for (int i = 0; i < vertices.Length; i++) {
+			float percentX = Mathf.InverseLerp (-map.GetLength (0) / 2 * squareSize, map.GetLength (0) / 2 * squareSize, vertices [i].x) * tileAmount;
+			float percentY = Mathf.InverseLerp (-map.GetLength (0) / 2 * squareSize, map.GetLength (0) / 2 * squareSize, vertices [i].z) * tileAmount;
+			uvs [i] = new Vector2 (percentX, percentY);
 		}
 		mesh.uv = uvs;
 
 
-
-
+		mesh.RecalculateBounds (); // Обновляем вершины
+		mesh.RecalculateNormals (); // Обновляем нормали
 
 	}
 
 
 
-	void RandomFillMap ()
-	{
-		if (useRandomSeed) {
-			seed = Time.time.ToString ();
-		}
-
-		System.Random pseudoRandom = new System.Random (seed.GetHashCode ());
-
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				if (x == 0 || x == width - 1 || y == 0 || y == height - 1) {
-					map [x, y] = 1;
-				} else {
-					map [x, y] = (pseudoRandom.Next (0, 100) < randomFillPercent) ? 1 : 0;
-				}
-			}
-		}
-	}
-
-	void SmoothMap ()
-	{
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				int neighbourWallTiles = GetSurroundingWallCount (x, y);
-
-				if (neighbourWallTiles > 4)
-					map [x, y] = 1;
-				else if (neighbourWallTiles < 4)
-					map [x, y] = 0;
-
-			}
-		}
-	}
-
-	int GetSurroundingWallCount (int gridX, int gridY)
-	{
-		int wallCount = 0;
-		for (int neighbourX = gridX - 1; neighbourX <= gridX + 1; neighbourX++) {
-			for (int neighbourY = gridY - 1; neighbourY <= gridY + 1; neighbourY++) {
-				if (neighbourX >= 0 && neighbourX < width && neighbourY >= 0 && neighbourY < height) {
-					if (neighbourX != gridX || neighbourY != gridY) {
-						wallCount += map [neighbourX, neighbourY];
-					}
-				} else {
-					wallCount++;
-				}
-			}
-		}
-
-		return wallCount;
-	}
-
+	//	void RandomFillMap ()
+	//	{
+	//		if (useRandomSeed) {
+	//			seed = Time.time.ToString ();
+	//		}
+	//
+	//		System.Random pseudoRandom = new System.Random (seed.GetHashCode ());
+	//
+	//		for (int x = 0; x < width; x++) {
+	//			for (int y = 0; y < height; y++) {
+	//				if (x == 0 || x == width - 1 || y == 0 || y == height - 1) {
+	//					map [x, y] = 1;
+	//				} else {
+	//					map [x, y] = (pseudoRandom.Next (0, 100) < randomFillPercent) ? 1 : 0;
+	//				}
+	//			}
+	//		}
+	//	}
+	//	legacy code
+	//	void SmoothMap ()
+	//	{
+	//		for (int x = 0; x < width; x++) {
+	//			for (int y = 0; y < height; y++) {
+	//				int neighbourWallTiles = GetSurroundingWallCount (x, y);
+	//
+	//				if (neighbourWallTiles > 4)
+	//					map [x, y] = 1;
+	//				else if (neighbourWallTiles < 4)
+	//					map [x, y] = 0;
+	//
+	//			}
+	//		}
+	//	}
+	// 	legacy code
+	//	int GetSurroundingWallCount (int gridX, int gridY)
+	//	{
+	//		int wallCount = 0;
+	//		for (int neighbourX = gridX - 1; neighbourX <= gridX + 1; neighbourX++) {
+	//			for (int neighbourY = gridY - 1; neighbourY <= gridY + 1; neighbourY++) {
+	//				if (neighbourX >= 0 && neighbourX < width && neighbourY >= 0 && neighbourY < height) {
+	//					if (neighbourX != gridX || neighbourY != gridY) {
+	//						wallCount += map [neighbourX, neighbourY];
+	//					}
+	//				} else {
+	//					wallCount++;
+	//				}
+	//			}
+	//		}
+	//
+	//		return wallCount;
+	//	}
+	//
 
 
 	//
