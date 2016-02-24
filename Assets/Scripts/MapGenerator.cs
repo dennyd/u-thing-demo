@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
+using UnityEditor;
 using System.Collections;
 using System;
+
 
 [RequireComponent (typeof(MeshFilter), typeof(MeshRenderer))]
 public class MapGenerator : MonoBehaviour
@@ -13,7 +15,7 @@ public class MapGenerator : MonoBehaviour
 	public int width;
 	public int height;
 
-	public string seed;
+//	public string seed;
 	public bool useRandomSeed;
 
 	//	[Range (0, 100)]
@@ -22,12 +24,20 @@ public class MapGenerator : MonoBehaviour
 
 	public float noiseLevel;
 	public float noiseScale;
-	[Range (0, 100)]
+	[Range (0, 300)]
 	public float meshScale;
 
 	float[,] map;
 	float mapLowestVal=0;
 	float mapHighestVal=0;
+
+	public Texture2D heatMapTexture;
+	public Texture2D finalTexture;
+	public Material mat;
+	public Texture2D grass;
+	public Texture2D rock;
+	public Texture2D snow;
+	public Texture2D water;
 
 
 	private Vector3[] vertices;
@@ -35,17 +45,34 @@ public class MapGenerator : MonoBehaviour
 
 	void Start ()
 	{
-		float t0 = System.DateTime.Now.Millisecond;
-		float t1 = System.DateTime.Now.Millisecond;
-		Debug.Log ("generate map exec time:" + (t1 - t0));
+		mat = new Material(Shader.Find("Standard"));
+		GetComponent<Renderer>().material = mat;
+
+
+
+		string path = AssetDatabase.GetAssetPath(grass);
+		TextureImporter textureImporter = AssetImporter.GetAtPath(path) as TextureImporter;
+		textureImporter.isReadable = true;
+		AssetDatabase.ImportAsset(path);
+
+		path = AssetDatabase.GetAssetPath(water);
+		textureImporter = AssetImporter.GetAtPath(path) as TextureImporter;
+		textureImporter.isReadable = true;
+		AssetDatabase.ImportAsset(path);
+
+		path = AssetDatabase.GetAssetPath(snow);
+		textureImporter = AssetImporter.GetAtPath(path) as TextureImporter;
+		textureImporter.isReadable = true;
+		AssetDatabase.ImportAsset(path);
+
+		path = AssetDatabase.GetAssetPath(rock);
+		textureImporter = AssetImporter.GetAtPath(path) as TextureImporter;
+		textureImporter.isReadable = true;
+		AssetDatabase.ImportAsset(path);
 
 		GenerateMap ();
 		GenerateMesh ();
-
-//		Debug.Log (Mathf.PerlinNoise(1.1f,1.1f));
-//		Debug.Log (Mathf.PerlinNoise(2.1f,1.1f));
-//		Debug.Log (Mathf.PerlinNoise(2.1f,2.1f));
-
+		GenerateTexture ();
 
 
 	}
@@ -55,6 +82,7 @@ public class MapGenerator : MonoBehaviour
 		if (Input.GetMouseButtonDown (0)) {
 			GenerateMap ();
 			GenerateMesh ();
+			GenerateTexture ();
 		}
 	}
 
@@ -64,11 +92,10 @@ public class MapGenerator : MonoBehaviour
 		float seed = 0;
 		if(useRandomSeed){
 			seed = Time.time;
-
 		}
+
 		GenerateNoise (seed, noiseScale, noiseLevel);
 		NormaliseMap ();
-
 
 	}
 
@@ -95,6 +122,7 @@ public class MapGenerator : MonoBehaviour
 
 					// todo: optimization
 					map [x, y] = (Mathf.PerlinNoise (seed + x/scale, seed+ y/scale)) * level;
+
 					if(map [x, y]>mapHighestVal){
 						mapHighestVal = map [x, y];
 					}
@@ -102,7 +130,6 @@ public class MapGenerator : MonoBehaviour
 					if(map [x, y]< mapLowestVal){
 						mapLowestVal = map [x, y];
 					}
-//
 				}
 			}
 		}
@@ -171,7 +198,7 @@ public class MapGenerator : MonoBehaviour
 				colors [i] = Color.Lerp (Color.blue, Color.red, map [x, z]);
 			}
 		}
-		mesh.colors = colors;
+//		mesh.colors = colors;
 
 		// addding colider to the mesh	
 		MeshCollider mc = gameObject.GetComponent<MeshCollider> ();
@@ -182,24 +209,113 @@ public class MapGenerator : MonoBehaviour
 		mc.sharedMesh = mesh;
 
 		// texture, uvs etc
-		int tileAmount = 6;
-		float squareSize = 2;
+
 		Vector2[] uvs = new Vector2[vertices.Length];
 		for (int i = 0; i < vertices.Length; i++) {
-			float percentX = Mathf.InverseLerp (-map.GetLength (0) / 2 * squareSize, map.GetLength (0) / 2 * squareSize, vertices [i].x) * tileAmount;
-			float percentY = Mathf.InverseLerp (-map.GetLength (0) / 2 * squareSize, map.GetLength (0) / 2 * squareSize, vertices [i].z) * tileAmount;
+			float percentX = Mathf.InverseLerp (0 , width, vertices [i].x);
+			float percentY = Mathf.InverseLerp (0, height, vertices [i].z);
 			uvs [i] = new Vector2 (percentX, percentY);
 		}
+			
 		mesh.uv = uvs;
 
-
-		mesh.RecalculateBounds (); // Обновляем вершины
-		mesh.RecalculateNormals (); // Обновляем нормали
-
+		mesh.RecalculateBounds (); 
+		mesh.RecalculateNormals ();
 	}
 
 
 
+	void GenerateTexture(){
+		
+		heatMapTexture = new Texture2D(width, height);
+		for (int x = 0; x < heatMapTexture.width; x++) {
+			for (int y = 0; y < heatMapTexture.height; y++) {	
+				Color color = Color.Lerp(Color.white, Color.black, map[x,y]);
+				heatMapTexture.SetPixel(x, y, color);
+			}
+		}
+		heatMapTexture.Apply();
+
+
+
+
+		finalTexture = new Texture2D(width, height);
+		for (int x = 0; x < finalTexture.width; x++) {
+			for (int y = 0; y < finalTexture.height; y++) {	
+				Color color = Color.magenta;
+				float step = 1.0f / 7;
+				float h = map [x, y];
+				if (h > 6 * step) {
+
+//					color = Color.white;
+					Texture2D temp = snow;
+					color = temp.GetPixel(x%temp.width,y%temp.height);
+
+
+				} else if (h > 5 * step) {
+
+					float min = 5 * step;
+					float max = 6 * step;
+
+					Texture2D temp = rock;
+					Color col1 = temp.GetPixel(x%temp.width,y%temp.height);
+					temp = snow;
+					Color col2 = temp.GetPixel(x%temp.width,y%temp.height);
+
+//					color = Color.Lerp(Color.grey, Color.white, Normalize(h,min,max));
+					color = Color.Lerp(col1, col2, Normalize(h,min,max));
+				} else if (h > 4 * step) {
+//					color = Color.grey;
+					Texture2D temp = rock;
+					color = temp.GetPixel(x%temp.width,y%temp.height);
+				} else if (h > 3 * step) {
+
+					float min = 3 * step;
+					float max = 4 * step;
+
+					Texture2D temp = grass;
+					Color col1 = temp.GetPixel((x%temp.width),y%temp.height);
+					temp = rock;
+					Color col2 = temp.GetPixel(x%temp.width,y%temp.height);
+
+					color = Color.Lerp(col1, col2, Normalize(h,min,max));
+//					color = Color.Lerp(grass, rock, Normalize(h,min,max));
+				} else if (h > 2 * step) {
+//					color = Color.green;
+					Texture2D temp = grass;
+					color = temp.GetPixel((x%temp.width)/10,(y%temp.height)/10);
+				} else if (h > 1 * step) {
+
+					float min = 1 * step;
+					float max = 2 * step;
+
+					Texture2D temp = water;
+					Color col1 = temp.GetPixel(x%temp.width,y%temp.height);
+					temp = grass;
+					Color col2 = temp.GetPixel(x%temp.width,y%temp.height);
+
+					color = Color.Lerp(col1, col2, Normalize(h,min,max));
+//					color = Color.Lerp(water, grass, Normalize(h,min,max));
+
+				} else {
+					color = Color.blue;
+					Texture2D temp = water;
+					color = temp.GetPixel(x%temp.width,y%temp.height);
+					//color = Color.Lerp(col1, col2, Normalize(h,min,max));
+
+				}
+
+
+				finalTexture.SetPixel(x, y, color);
+			}
+		}
+		heatMapTexture.Apply();
+		finalTexture.Apply ();
+
+		mat.SetTexture ("_MainTex", finalTexture);
+//		mat.SetTexture ("_ParallaxMap", heatMapTexture);
+
+	}
 	//	void RandomFillMap ()
 	//	{
 	//		if (useRandomSeed) {
@@ -280,5 +396,10 @@ public class MapGenerator : MonoBehaviour
 	//			Gizmos.DrawSphere(vertices[i], 0.1f);
 	//		}
 	//	}
+
+
+	float Normalize (float val, float min, float max){
+		return (val - min) / (max - min);
+	}
 
 }
