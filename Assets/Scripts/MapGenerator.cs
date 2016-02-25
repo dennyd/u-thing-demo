@@ -4,6 +4,14 @@ using System.Collections;
 using System;
 
 
+// texturing notes
+// 512x512px with 2x2 tilnig for 20x20 units map
+// wirking with ~ 50px for a unities unit
+
+
+
+
+
 [RequireComponent (typeof(MeshFilter), typeof(MeshRenderer))]
 public class MapGenerator : MonoBehaviour
 {
@@ -39,14 +47,18 @@ public class MapGenerator : MonoBehaviour
 	public Texture2D snow;
 	public Texture2D water;
 
+	public Texture2D grass_spread;
+	public Texture2D rock_spread;
+	public Texture2D snow_spread;
+	public Texture2D water_spread;
 
 	private Vector3[] vertices;
 
 
 	void Start ()
 	{
-		mat = new Material(Shader.Find("Standard"));
-		GetComponent<Renderer>().material = mat;
+//		mat = new Material(Shader.Find("Standard"));
+//		GetComponent<Renderer>().material = mat;
 
 
 
@@ -54,6 +66,9 @@ public class MapGenerator : MonoBehaviour
 		TextureImporter textureImporter = AssetImporter.GetAtPath(path) as TextureImporter;
 		textureImporter.isReadable = true;
 		AssetDatabase.ImportAsset(path);
+
+		Debug.Log ("Grass w: " + grass.width);
+		Debug.Log ("Grass h: " + grass.height);
 
 		path = AssetDatabase.GetAssetPath(water);
 		textureImporter = AssetImporter.GetAtPath(path) as TextureImporter;
@@ -70,9 +85,13 @@ public class MapGenerator : MonoBehaviour
 		textureImporter.isReadable = true;
 		AssetDatabase.ImportAsset(path);
 
+
+
 		GenerateMap ();
 		GenerateMesh ();
 		GenerateTexture ();
+
+
 
 
 	}
@@ -104,7 +123,7 @@ public class MapGenerator : MonoBehaviour
 		float[,] normalMap = new float[width+1, height+1];
 		for (int x = 0; x <= width; x++) {
 			for (int y = 0; y <= height; y++) {
-				normalMap [x, y] = (map[x,y]-mapLowestVal)/(mapHighestVal-mapLowestVal) ;
+				normalMap [x, y] = (map[x,y]-mapLowestVal)/(mapHighestVal-mapLowestVal);
 			}
 		}
 		map = normalMap;
@@ -238,6 +257,46 @@ public class MapGenerator : MonoBehaviour
 
 
 
+		// 50px for unity unit
+		int pixelsPerUnit =50;
+
+		grass_spread = new Texture2D (grass.width* pixelsPerUnit,grass.height*pixelsPerUnit);
+
+		// legacy block
+		water_spread = new Texture2D (grass.width,grass.height);
+		rock_spread = new Texture2D (grass.width,grass.height);
+		snow_spread = new Texture2D (grass.width,grass.height);
+
+
+
+
+		int tilingX=1;
+		int tilingY=1;
+
+		// spread texture prer
+		for (int x = 0; x < grass_spread.width; x++) {
+			for (int y = 0; y < grass_spread.height; y++) {
+						
+				grass_spread.SetPixel (x, y, grass.GetPixel (x%grass_spread.width, y%grass_spread.height ));
+
+//				rock_spread.SetPixel (x, y, rock.GetPixel (x % rock.width, y % rock.height));
+//				snow_spread.SetPixel (x, y, snow.GetPixel (x % snow.width, y % snow.height));
+//				water_spread.SetPixel (x, y, water.GetPixel (x % water.width, y % water.height));
+//
+			}
+		}
+
+		grass_spread.Apply ();
+
+
+
+
+	
+
+		//
+
+
+
 
 		finalTexture = new Texture2D(width, height);
 		for (int x = 0; x < finalTexture.width; x++) {
@@ -248,8 +307,8 @@ public class MapGenerator : MonoBehaviour
 				if (h > 6 * step) {
 
 //					color = Color.white;
-					Texture2D temp = snow;
-					color = temp.GetPixel(x%temp.width,y%temp.height);
+					Texture2D temp = snow_spread;
+					color = temp.GetPixel(x,y);
 
 
 				} else if (h > 5 * step) {
@@ -257,50 +316,50 @@ public class MapGenerator : MonoBehaviour
 					float min = 5 * step;
 					float max = 6 * step;
 
-					Texture2D temp = rock;
-					Color col1 = temp.GetPixel(x%temp.width,y%temp.height);
-					temp = snow;
-					Color col2 = temp.GetPixel(x%temp.width,y%temp.height);
+					Texture2D temp = rock_spread;
+					Color col1 = temp.GetPixel(x,y);
+					temp = snow_spread;
+					Color col2 = temp.GetPixel(x,y);
 
 //					color = Color.Lerp(Color.grey, Color.white, Normalize(h,min,max));
 					color = Color.Lerp(col1, col2, Normalize(h,min,max));
 				} else if (h > 4 * step) {
 //					color = Color.grey;
-					Texture2D temp = rock;
-					color = temp.GetPixel(x%temp.width,y%temp.height);
+					Texture2D temp = rock_spread;
+					color = temp.GetPixel(x,y);
 				} else if (h > 3 * step) {
 
 					float min = 3 * step;
 					float max = 4 * step;
 
-					Texture2D temp = grass;
-					Color col1 = temp.GetPixel((x%temp.width),y%temp.height);
-					temp = rock;
-					Color col2 = temp.GetPixel(x%temp.width,y%temp.height);
+					Texture2D temp = grass_spread;
+					Color col1 = temp.GetPixel((x),y);
+					temp = rock_spread;
+					Color col2 = temp.GetPixel(x,y);
 
 					color = Color.Lerp(col1, col2, Normalize(h,min,max));
 //					color = Color.Lerp(grass, rock, Normalize(h,min,max));
 				} else if (h > 2 * step) {
 //					color = Color.green;
-					Texture2D temp = grass;
-					color = temp.GetPixel((x%temp.width)/10,(y%temp.height)/10);
+					Texture2D temp = grass_spread;
+					color = temp.GetPixel((x),(y));
 				} else if (h > 1 * step) {
 
 					float min = 1 * step;
 					float max = 2 * step;
 
-					Texture2D temp = water;
-					Color col1 = temp.GetPixel(x%temp.width,y%temp.height);
-					temp = grass;
-					Color col2 = temp.GetPixel(x%temp.width,y%temp.height);
+					Texture2D temp = water_spread;
+					Color col1 = temp.GetPixel(x,y);
+					temp = grass_spread;
+					Color col2 = temp.GetPixel(x,y);
 
 					color = Color.Lerp(col1, col2, Normalize(h,min,max));
 //					color = Color.Lerp(water, grass, Normalize(h,min,max));
 
 				} else {
 					color = Color.blue;
-					Texture2D temp = water;
-					color = temp.GetPixel(x%temp.width,y%temp.height);
+					Texture2D temp = water_spread;
+					color = temp.GetPixel(x,y);
 					//color = Color.Lerp(col1, col2, Normalize(h,min,max));
 
 				}
@@ -312,7 +371,9 @@ public class MapGenerator : MonoBehaviour
 		heatMapTexture.Apply();
 		finalTexture.Apply ();
 
-		mat.SetTexture ("_MainTex", finalTexture);
+		Material mat = GetComponent<MeshRenderer> ().sharedMaterial;
+
+		mat.SetTexture ("_MainTex", grass_spread);
 //		mat.SetTexture ("_ParallaxMap", heatMapTexture);
 
 	}
