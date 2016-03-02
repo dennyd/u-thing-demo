@@ -59,8 +59,6 @@ public class MouseController : MonoBehaviour
 
 			if (closest.x > -1) {
 				int index = vorDiagram.Regions ().IndexOf (vorDiagram.Region(closest));
-//				Debug.Log ("GOOOD " + index);
-
 				Texture2D tex = vorTex [index];
 				tex.Apply ();
 				projector.material.mainTexture = tex; 

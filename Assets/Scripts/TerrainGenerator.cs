@@ -54,6 +54,8 @@ public class TerrainGenerator : MonoBehaviour
 	public Voronoi voronoiDiagram;
 	public List<Texture2D> voronoiTexList;
 
+	public int[,] pointToRegionMap;
+
 	void Start ()
 	{
 		GenerateMap ();
@@ -215,7 +217,7 @@ public class TerrainGenerator : MonoBehaviour
 			for (var y = 0; y < terrainData.alphamapHeight; y++)
 			{
 				// voronoi tex
-				splatMap [x, y,4] = 0.5f;
+				splatMap [x, y,4] = 0.3f;
 
 				if (map [x, y] > 0.9) {
 					splatMap [x, y, 0] = 1;
@@ -301,7 +303,7 @@ public class TerrainGenerator : MonoBehaviour
 
 	void Update ()
 	{
-		if (Input.GetMouseButtonDown (0)) {
+		if (Input.GetMouseButtonDown (1)) {
 			GenerateMap ();
 			GenerateTerrain ();
 			GenerateVoronoi();
@@ -344,13 +346,6 @@ public class TerrainGenerator : MonoBehaviour
 //		Texture2D tx = new Texture2D(512,512);
 		Texture2D tx = new Texture2D(width,height);
 
-//		for (int i=0; i<512; i++){
-//			for (int j=0; j<512; j++){
-//				tx.SetPixel (i, j, Color.black);
-//			}	
-//		}
-
-
 		for (int i=0; i<width; i++){
 			for (int j=0; j<height; j++){
 				tx.SetPixel (i, j, Color.black);
@@ -388,6 +383,9 @@ public class TerrainGenerator : MonoBehaviour
 		projector.material = mat;
 		projector.orthographicSize = 128;
 
+		long t1 = System.DateTime.Now.Millisecond;
+		pointToRegionMap = ComputePointToRegionArray (voronoiDiagram);
+		Debug.Log("time for ComputePointToRegionArray: "+ (System.DateTime.Now.Millisecond - t1));
 		Texture2D fst = new Texture2D(width,height);
 			
 		for (int i=0; i<width; i++){
@@ -400,15 +398,14 @@ public class TerrainGenerator : MonoBehaviour
 			// if the edge doesn't have clippedEnds, if was not within the bounds, dont draw it
 			if (edge.ClippedEnds == null) continue;
 			DrawLine(edge.ClippedEnds[LR.LEFT], edge.ClippedEnds[LR.RIGHT], fst, new Color(1,1,1,0.5f));
-
-
 		}
 
 		voronoiTexList = new List<Texture2D> ();
 
+
+
 		for (int i = 0; i < VoronoiPolygonNumber; i++) {
 			Texture2D tex = new Texture2D (width, height);
-
 			voronoiTexList.Add (tex);
 		}
 
@@ -416,35 +413,45 @@ public class TerrainGenerator : MonoBehaviour
 		for (int i = 0; i < voronoi.Regions().Count; i++) {
 			List<Vector2f> region = voronoi.Regions()[i];
 			Texture2D tex = voronoiTexList [i];
+			Color[] pixArray = tex.GetPixels ();
+			t1 = System.DateTime.Now.Millisecond;
 
-			for (int x=0; x<width; x++){
-				for (int y=0; y<height; y++){
-					tex.SetPixel (x, y, new Color(0,0,0,0));
+			for(int t=0; t<pixArray.Length; t++){
+				// de-flattering
+				int y = (int) Math.Floor ( t / width  *1.0f );
+				int x = t - (y * width);
+
+				pixArray [t] = new Color (0, 0, 0, 0);
+
+//				if (RegionOfPoint(new Vector2f(x,y),voronoi)==i){
+////					tex.SetPixel (x, y, new Color(1,1,1,0.3f));
+//					pixArray [t] = new Color(1,1,1,0.3f);
+//				}
+				if (pointToRegionMap[x,y]==i){
+					//					tex.SetPixel (x, y, new Color(1,1,1,0.3f));
+					pixArray [t] = new Color(1,1,1,0.3f);
+				}
+//				Debug.Log("time sub: "+ (System.DateTime.Now.Millisecond - t2));
 
 
-					if (RegionOfPoint(new Vector2f(x,y),voronoi)==i){
-						tex.SetPixel (x, y, new Color(1,1,1,0.3f));
-					}
-
-//
-//					if ( voronoi.Region(new Vector2f(x,y) ) == region) {
-//						
-//					}
-//
-				}	
 			}
+
+			Debug.Log("time for 1 tex: "+ (System.DateTime.Now.Millisecond - t1));
+			tex.SetPixels (pixArray);
+//			for (int x=0; x<width; x++){
+//				for (int y=0; y<height; y++){
+//					tex.SetPixel (x, y, new Color(0,0,0,0));
+//
+//					if (RegionOfPoint(new Vector2f(x,y),voronoi)==i){
+//						tex.SetPixel (x, y, new Color(1,1,1,0.3f));
+//					}
+//				}	
+//			}
 
 			tex.Apply ();
 
 		}
-
-//		foreach (List<Vector2f> region in voronoi.Regions()) {
-//
-//			//region -  list of points
-//
-//
-//		}
-
+			
 
 		fst.Apply ();
 		mat.mainTexture = fst;
@@ -487,6 +494,7 @@ public class TerrainGenerator : MonoBehaviour
 	}
 
 
+
 	int RegionOfPoint(Vector2f p, Voronoi vd){
 
 		Dictionary<Vector2f,Site> sites = vd.SitesIndexedByLocation;
@@ -505,9 +513,7 @@ public class TerrainGenerator : MonoBehaviour
 			}
 
 		}
-
-		// closest
-
+			
 		if (closest.x > -1) {
 			int index = vd.Regions ().IndexOf (vd.Region(closest));
 			return index;
@@ -515,4 +521,24 @@ public class TerrainGenerator : MonoBehaviour
 
 		return -1;
 	}
+
+	int[,] ComputePointToRegionArray(Voronoi vd){
+
+		int width = this.width;
+		int height = this.height;
+
+		int[,] outArr = new int[width,height];
+
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+
+				outArr [x,y] = RegionOfPoint (new Vector2f(x,y),vd);
+
+			}
+		}
+
+		return outArr;	
+	}
+
 }
