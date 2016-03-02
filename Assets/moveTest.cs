@@ -53,6 +53,7 @@ public class moveTest : MonoBehaviour {
 		moveTest.Selected = this;
 	}
 
+	private float speed;
 	// Use this for initialization
 	void FixedUpdate() {
 
@@ -60,7 +61,7 @@ public class moveTest : MonoBehaviour {
 			float movementX = Input.GetAxis ("Horizontal");
 			float movementZ = Input.GetAxis ("Vertical");
 			rb.velocity = new Vector3 (movementX * movementMultiplier, 0.0f, movementZ * movementMultiplier);
-			animator.SetFloat ("Speed", Mathf.Abs( (movementX + movementZ) * movementMultiplier));
+			speed = Mathf.Abs ((movementX + movementZ) * movementMultiplier);
 		}
 
 		activeColorScheme = (Selected == this) ? selectedColorScheme : colorscheme;
@@ -68,12 +69,10 @@ public class moveTest : MonoBehaviour {
 
 		// click 
 		handleClick();
+		move();
 
 		animator.SetBool ("Selected", moveTest.Selected == this);
-	}
-
-	void Update() {
-		move();
+		animator.SetFloat ("Speed", speed);
 	}
 
 	private Vector3 startCoords, endCoords;
@@ -99,6 +98,7 @@ public class moveTest : MonoBehaviour {
 							dist = Vector3.Distance (startCoords, endCoords);
 							time = Time.time;
 							transform.LookAt (endCoords);
+							speed = movementSpeed * 2;
 						}
 					}
 				}
@@ -112,8 +112,10 @@ public class moveTest : MonoBehaviour {
 			float fracJourney = distCovered / dist;
 			Vector3 lerp = Vector3.Lerp (startCoords, endCoords, fracJourney);
 			transform.position = lerp;
+			animator.SetFloat ("Speed", movementSpeed);
 			if (Vector3.Distance(endCoords, lerp) == 0) {
 				shouldMove = false;
+				speed = 0;
 			};
 		}
 	}
