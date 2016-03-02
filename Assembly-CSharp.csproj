@@ -45,9 +45,51 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\CameraController.cs" />
-     <Compile Include="Assets\moveTest.cs" />
-     <None Include="Assets\Alien\ALien Info.txt" />
+     <Compile Include="Assets\Imports\Libs\Libs\Delaunay\Edge.cs" />
+     <Compile Include="Assets\Imports\Libs\Libs\Delaunay\EdgeList.cs" />
+     <Compile Include="Assets\Imports\Libs\Libs\Delaunay\EdgeReorderer.cs" />
+     <Compile Include="Assets\Imports\Libs\Libs\Delaunay\Halfedge.cs" />
+     <Compile Include="Assets\Imports\Libs\Libs\Delaunay\HalfedgePriorityQueue.cs" />
+     <Compile Include="Assets\Imports\Libs\Libs\Delaunay\ICoord.cs" />
+     <Compile Include="Assets\Imports\Libs\Libs\Delaunay\LR.cs" />
+     <Compile Include="Assets\Imports\Libs\Libs\Delaunay\Site.cs" />
+     <Compile Include="Assets\Imports\Libs\Libs\Delaunay\SiteList.cs" />
+     <Compile Include="Assets\Imports\Libs\Libs\Delaunay\Triangle.cs" />
+     <Compile Include="Assets\Imports\Libs\Libs\Delaunay\Vertex.cs" />
+     <Compile Include="Assets\Imports\Libs\Libs\Delaunay\Voronoi.cs" />
+     <Compile Include="Assets\Imports\Libs\Libs\Demo.cs" />
+     <Compile Include="Assets\Imports\Libs\Libs\Geom\Circle.cs" />
+     <Compile Include="Assets\Imports\Libs\Libs\Geom\LineSegment.cs" />
+     <Compile Include="Assets\Imports\Libs\Libs\Geom\Polygon.cs" />
+     <Compile Include="Assets\Imports\Libs\Libs\Geom\Rectf.cs" />
+     <Compile Include="Assets\Imports\Libs\Libs\Geom\Vector2f.cs" />
+     <Compile Include="Assets\Imports\Libs\Libs\Geom\Winding.cs" />
+     <Compile Include="Assets\Scripts\CameraController.cs" />
+     <Compile Include="Assets\Scripts\MouseController.cs" />
+     <Compile Include="Assets\Scripts\TerrainGenerator.cs" />
+     <Compile Include="Assets\Scripts\UnitMoveable.cs" />
+     <Compile Include="Assets\Scripts\moveTest.cs" />
+     <Compile Include="Assets\Textures\SphericalTerrain\Scripts\MainScripts\EditorClass.cs" />
+     <Compile Include="Assets\Textures\SphericalTerrain\Scripts\MainScripts\PlanetStatisticsClass.cs" />
+     <Compile Include="Assets\Textures\SphericalTerrain\Scripts\MainScripts\ProjectorClass.cs" />
+     <Compile Include="Assets\Textures\SphericalTerrain\Scripts\MainScripts\ToolsClass.cs" />
+     <Compile Include="Assets\Textures\SphericalTerrain\Scripts\MainScripts\UIClass.cs" />
+     <Compile Include="Assets\Textures\SphericalTerrain\Scripts\Utility\FauxGravity\FauxGravityAttractor.cs" />
+     <Compile Include="Assets\Textures\SphericalTerrain\Scripts\Utility\FauxGravity\FauxGravityBody.cs" />
+     <Compile Include="Assets\Textures\SphericalTerrain\Scripts\Utility\Movement.cs" />
+     <Compile Include="Assets\Textures\SphericalTerrain\Scripts\Utility\NewUI\GetSliderValue.cs" />
+     <Compile Include="Assets\Textures\SphericalTerrain\Scripts\Utility\Noise.cs" />
+     <Compile Include="Assets\Textures\SphericalTerrain\Scripts\Utility\OceanController.cs" />
+     <Compile Include="Assets\Textures\SphericalTerrain\Scripts\Utility\PlanetHelpers.cs" />
+     <Compile Include="Assets\Textures\SphericalTerrain\Scripts\Utility\RotateAround.cs" />
+     <Compile Include="Assets\Textures\SphericalTerrain\Scripts\Utility\SaveMesh.cs" />
+     <Compile Include="Assets\Textures\SphericalTerrain\Scripts\Utility\ToggleGO.cs" />
+     <Compile Include="Assets\Textures\SphericalTerrain\Scripts\Utility\WindowIDManager.cs" />
+     <None Include="Assets\Textures\SphericalTerrain\Shaders\SplatMap.shader" />
+     <None Include="Assets\Textures\SphericalTerrain\Shaders\Projector Multiply.shader" />
+     <None Include="Assets\Textures\SphericalTerrain\Shaders\Projector Light.shader" />
+     <None Include="Assets\Imports\Alien\ALien Info.txt" />
+     <None Include="Assets\Textures\SphericalTerrain\Shaders\SampleSphereTerrainShader.shader" />
  <Reference Include="UnityEngine.Networking">
  <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/Networking/UnityEngine.Networking.dll</HintPath>
  </Reference>
