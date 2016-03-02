@@ -78,12 +78,14 @@ public class TerrainGenerator : MonoBehaviour
 			terrainData = new TerrainData();
 		}
 
+		terrainData.heightmapResolution = t_heightmap_resolution;
+		terrainData.alphamapResolution = t_resolution;
+
 
 
 //		terrainData.size = new Vector3( t_width/ 16f, terrainHeight, t_height/ 16f );
 		terrainData.size = new Vector3( t_width, terrainHeight, t_height );
-		terrainData.heightmapResolution = t_heightmap_resolution;
-		terrainData.alphamapResolution = t_resolution;
+
 		terrainData.SetHeights (0, 0, map);
 		GameObject activeTerrain;
 		if (Terrain.activeTerrain != null) {
@@ -386,7 +388,7 @@ public class TerrainGenerator : MonoBehaviour
 
 		long t1 = System.DateTime.Now.Millisecond;
 		pointToRegionMap = ComputePointToRegionArray (voronoiDiagram);
-		Debug.Log("time for ComputePointToRegionArray: "+ (System.DateTime.Now.Millisecond - t1));
+//		Debug.Log("time for ComputePointToRegionArray: "+ (System.DateTime.Now.Millisecond - t1));
 		Texture2D fst = new Texture2D(width,height);
 			
 		for (int i=0; i<width; i++){

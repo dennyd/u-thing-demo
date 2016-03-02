@@ -9,6 +9,7 @@ public class UnitMoveable : MonoBehaviour {
 	private Animator animator;
 
 	public float movementSpeed = 2.0f;
+	public float destinationTolerance = 1f;
 	// Use this for initialization
 	void Start () {
 		isMoving = false;
@@ -19,8 +20,9 @@ public class UnitMoveable : MonoBehaviour {
 	// Update is called once per frame
 	void FixedUpdate () {
 		if (isMoving) {
-			if (transform.position.Equals (vDestination)) {
+			if (Vector3.Distance(transform.position, vDestination) <= destinationTolerance) {
 				isMoving = false;
+				animator.SetFloat ("Speed", 0);
 			} else {
 				float distCovered = (Time.time - time) * movementSpeed;
 				float fracJourney = distCovered / dist;
@@ -36,7 +38,7 @@ public class UnitMoveable : MonoBehaviour {
 	}
 
 	public void MoveTo(Vector3 vPoint) {
-		transform.LookAt (new Vector3(vPoint.x, vPoint.y, vPoint.z));
+		transform.LookAt (new Vector3(vPoint.x, transform.position.y, vPoint.z));
 		vDestination = vPoint;
 		time = Time.time;
 		dist = Vector3.Distance (transform.position, vPoint);

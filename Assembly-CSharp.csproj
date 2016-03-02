@@ -66,6 +66,7 @@
      <Compile Include="Assets\Imports\Libs\Libs\Geom\Winding.cs" />
      <Compile Include="Assets\Scripts\CameraController.cs" />
      <Compile Include="Assets\Scripts\MouseController.cs" />
+     <Compile Include="Assets\Scripts\MovementController.cs" />
      <Compile Include="Assets\Scripts\TerrainGenerator.cs" />
      <Compile Include="Assets\Scripts\UnitMoveable.cs" />
      <Compile Include="Assets\Scripts\moveTest.cs" />
