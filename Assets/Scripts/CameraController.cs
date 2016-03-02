@@ -23,6 +23,9 @@ public class CameraController : MonoBehaviour {
 	public float ZoomMin = 2;
 	public float ZoomMax = 15;
 
+	public int PanButton = 0;
+	public int RotateButton = 2;
+
 	// Update is called once per frame
 	void Update () {
 
@@ -31,10 +34,10 @@ public class CameraController : MonoBehaviour {
 	
 	}
 
+	private Vector3 mouseOrigin;
 	void doTransforms() {
 
 		var translation = Vector3.zero;
-		Vector3 pos = _camera.ScreenToViewportPoint(Input.mousePosition - Input.mousePosition);
 
 		// Zoom in or out
 		var zoomDelta = Input.GetAxis("Mouse ScrollWheel")*ZoomSpeed*Time.deltaTime;
@@ -47,10 +50,15 @@ public class CameraController : MonoBehaviour {
 		translation += new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
 
 		// Mouse move
-		if (Input.GetMouseButton (1)) { // Right Mouse Button
+		if (Input.GetMouseButton (PanButton)) { // Right Mouse Button
+			if (Input.GetMouseButtonDown (PanButton)) {
+				mouseOrigin = Input.mousePosition;
+			}
+			Vector3 pos = _camera.ScreenToViewportPoint(Input.mousePosition - mouseOrigin);
+
 			// Hold button and drag camera around
-			translation -= _offset(_camera.transform.right, Input.GetAxis ("Mouse X") * DragSpeed * Time.deltaTime);
-			translation -= _offset(_camera.transform.up, Input.GetAxis ("Mouse Y") * DragSpeed * Time.deltaTime);
+			translation -= _offset(_camera.transform.right, DragSpeed * Time.deltaTime * pos.x);
+			translation -= _offset(_camera.transform.up, DragSpeed * Time.deltaTime * pos.y);
 		} else {
 			// Move camera if mouse pointer reaches screen borders
 			if (Input.mousePosition.x >= 0 && Input.mousePosition.x < ScrollArea)
@@ -95,12 +103,11 @@ public class CameraController : MonoBehaviour {
 		return new Vector3 (vect.x * offset, 0, vect.z * offset);
 	}
 
-	private Vector3 mouseOrigin;
 	void doRotates() {
 
 
-		if (Input.GetMouseButton (2)) {
-			if (Input.GetMouseButtonDown (2)) {
+		if (Input.GetMouseButton (RotateButton)) {
+			if (Input.GetMouseButtonDown (RotateButton)) {
 				mouseOrigin = Input.mousePosition;
 			}
 			
