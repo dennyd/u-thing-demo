@@ -59,7 +59,7 @@ public class TerrainGenerator : MonoBehaviour
 	public int[,] pointToOwnerMap;
 	public int[] regionToOwnerMap;
 	public List<Vector2f> regionToSite;
-
+	public Texture2D vdTex;
 	void Start ()
 	{
 
@@ -398,6 +398,37 @@ public class TerrainGenerator : MonoBehaviour
 
 			DrawLine (edge.ClippedEnds [LR.LEFT], edge.ClippedEnds [LR.RIGHT], tx, c);
 
+//			if (true) {
+//				for (int i = 0; i < tx.width; i++) {
+//					for (int j = 0; j < tx.height; j++) {
+//						float col = tx.GetPixel (i, j).grayscale;
+//
+//						if(i>0 && i<tx.width-1 && j>0 && j<tx.height-1){
+//							float sum = 
+//								tx.GetPixel (i - 1, j - 1).grayscale + tx.GetPixel (i + 1, j + 1).grayscale +
+//								tx.GetPixel (i - 1, j + 1).grayscale + tx.GetPixel (i + 1, j - 1).grayscale +
+//								tx.GetPixel (i - 1, j).grayscale + tx.GetPixel (i, j - 1).grayscale +
+//								tx.GetPixel (i + 1, j).grayscale + tx.GetPixel (i, j + 1).grayscale;
+//
+////							sum /= 8f;
+//
+//							if(sum>0.1f){
+//								tx.SetPixel (i, j, new Color (1, 1, 1, 1));
+//							}
+//
+//
+//
+//						}
+//
+//					}
+//				}
+//
+//
+//			}
+
+
+//			DrawLine2 (tx,edge.ClippedEnds [LR.LEFT].x,edge.ClippedEnds [LR.LEFT].y,edge.ClippedEnds [LR.RIGHT].x,edge.ClippedEnds [LR.RIGHT].y,c);
+
 		}
 
 		for (int i=0;i<VoronoiPolygonNumber;i++){
@@ -463,7 +494,7 @@ public class TerrainGenerator : MonoBehaviour
 
 			Color p1 = Color.green;
 			Color p2 = Color.red;
-			Color c = new Color (1, 1, 1, 0.5f);
+			Color c = new Color (1, 1, 1, 0.7f);
 
 //			if(pointToOwnerMap[ (int) Math.Floor( edge.ClippedEnds[LR.LEFT].x),(int)Math.Floor( edge.ClippedEnds[LR.LEFT].y)]==1){
 //				c = p1;
@@ -472,8 +503,6 @@ public class TerrainGenerator : MonoBehaviour
 //			if(pointToOwnerMap[(int)Math.Floor( edge.ClippedEnds[LR.LEFT].x),(int)Math.Floor( edge.ClippedEnds[LR.LEFT].y)]==2){
 //				c = p2;
 //			}
-
-
 
 
 //
@@ -514,9 +543,9 @@ public class TerrainGenerator : MonoBehaviour
 				pixArrayP2[t] = new Color (0, 0, 0, 0);
 
 				if (pointToRegionMap [x, y] == i) {
-					pixArray [t] = new Color (1, 1, 1, 0.3f);
-					pixArrayP1 [t] = new Color (0, 1, 0, 0.3f);
-					pixArrayP2 [t] = new Color (1, 0, 0, 0.3f);
+					pixArray [t] = new Color (1, 1, 1, 0.5f);
+					pixArrayP1 [t] = new Color (1, 1, 1, 0.5f);
+					pixArrayP2 [t] = new Color (1, 1, 1, 0.5f);
 				}
 
 			}				
@@ -530,7 +559,7 @@ public class TerrainGenerator : MonoBehaviour
 			texP2.Apply ();
 		}
 			
-
+		vdTex = fst;
 		fst.Apply ();
 		mat.mainTexture = fst;
 
@@ -538,8 +567,7 @@ public class TerrainGenerator : MonoBehaviour
 	}
 
 
-
-
+		
 
 
 	private void DrawLine (Vector2f p0, Vector2f p1, Texture2D tx, Color c, int offset = 0)
@@ -557,7 +585,14 @@ public class TerrainGenerator : MonoBehaviour
 
 		while (true) {
 			tx.SetPixel (x0 + offset, y0 + offset, c);
-
+			tx.SetPixel (x0 + offset+1, y0 + offset+1, c);
+			tx.SetPixel (x0 + offset-1, y0 + offset-1, c);
+			tx.SetPixel (x0 + offset-1, y0 + offset+1, c);
+			tx.SetPixel (x0 + offset+1, y0 + offset-1, c);
+			tx.SetPixel (x0 + offset+1, y0 + offset, c);
+			tx.SetPixel (x0 + offset-1, y0 + offset, c);
+			tx.SetPixel (x0 + offset, y0 + offset+1, c);
+			tx.SetPixel (x0 + offset, y0 + offset-1, c);
 			if (x0 == x1 && y0 == y1)
 				break;
 			int e2 = 2 * err;

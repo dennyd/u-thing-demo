@@ -98,76 +98,97 @@ public class MouseController : MonoBehaviour
 
 				GameObject terrainGO = GameObject.FindGameObjectWithTag ("terrain");
 				TerrainGenerator tg = terrainGO.GetComponent<TerrainGenerator> ();
-
-				List<Texture2D> vorTex = tg.voronoiTexList;
-				List<Texture2D> vorTexP1 = tg.voronoiTexListPlayer1;
-				List<Texture2D> vorTexP2 = tg.voronoiTexListPlayer2;
-
-				Voronoi vorDiagram = tg.voronoiDiagram;
-				List<Vector2f> regionToSite = tg.regionToSite;
-
 				int width = tg.width;
 				int height = tg.height;
 
 				GameObject p = GameObject.FindGameObjectWithTag ("projector");
 				Projector projector = p.GetComponent<Projector> ();
 
-				int region = RegionOfPoint (new Vector2f (x, y), vorDiagram);
+				int region = RegionOfPoint (new Vector2f (x, y), tg.voronoiDiagram);
 				Debug.Log ("region: " + region);
 
-
-//				if (tg.regionToOwnerMap [region] == 1) {
-//					vorTex = vorTexP1;
-//				}
-//
-//				if (tg.regionToOwnerMap [region] == 2) {
-//					vorTex = vorTexP2;
-//				}
-					
-//
-//				Texture2D tex = vorTex [region];
-//				Texture2D tex1P = vorTexP1 [region];
-//				Texture2D tex2P = vorTexP2 [region];
-
-
-				Texture2D texCombined = new Texture2D (width, height);
-//				Texture2D texCombined = tex1P;
-
-				// CHANGE 
-//				tg.ComputePointToOwnerMap (tg.regionToOwnerMap,tg.pointToRegionMap);
-						
-				tg.regionToOwnerMap [region] = 2;
-		
+				Texture2D texCombined = new Texture2D (width, height);						
+				tg.regionToOwnerMap [region] = 2;		
 				tg.pointToOwnerMap = tg.ComputePointToOwnerMap (tg.regionToOwnerMap,tg.pointToRegionMap);
 
-
+				Texture2D mask = tg.vdTex;
 
 				for (int i = 0; i < width; i++) {
-					for (int j = 0; j < height; j++) {												
-						Color p1 = new Color (0, 1, 0, 0.3f);
-						Color p2 = new Color (1, 0, 0, 0.3f);
+					for (int j = 0; j < height; j++) {	
+						
+//						Color p1 = new Color (0, 1, 0, 0.3f);
+//						Color p2 = new Color (1, 0, 0, 0.3f);
+//						Color c = new Color (0, 0, 0, 1.0f);
+//
+//
+						Color p1 = new Color (0 , 1 , 0, mask.GetPixel(i,j).grayscale);
+						Color p2 = new Color (1, 0, 0,  mask.GetPixel(i,j).grayscale);
 						Color c = new Color (0, 0, 0, 1.0f);
 
+
 						if (tg.pointToOwnerMap [i, j] == 1) {							
+							
 							texCombined.SetPixel (i, j, p1);	
 						} else if (tg.pointToOwnerMap [i, j] == 2) {
 							texCombined.SetPixel (i, j, p2);	
 						} else {
 							texCombined.SetPixel (i, j, c);
-						}
-
-
+						}							
 					}
 				}
 				texCombined.Apply ();
-//				tex.Apply ();
-//				projector.material.mainTexture = tex; 
+
 				projector.material.mainTexture = texCombined; 
-
-
 
 			}
 
+			if (Input.GetMouseButtonDown (3)) {
+
+				GameObject terrainGO = GameObject.FindGameObjectWithTag ("terrain");
+				TerrainGenerator tg = terrainGO.GetComponent<TerrainGenerator> ();
+				int width = tg.width;
+				int height = tg.height;
+
+				GameObject p = GameObject.FindGameObjectWithTag ("projector");
+				Projector projector = p.GetComponent<Projector> ();
+
+				int region = RegionOfPoint (new Vector2f (x, y), tg.voronoiDiagram);
+				Debug.Log ("region: " + region);
+
+				Texture2D texCombined = new Texture2D (width, height);						
+				tg.regionToOwnerMap [region] = 1;		
+				tg.pointToOwnerMap = tg.ComputePointToOwnerMap (tg.regionToOwnerMap,tg.pointToRegionMap);
+
+				Texture2D mask = tg.vdTex;
+
+				for (int i = 0; i < width; i++) {
+					for (int j = 0; j < height; j++) {	
+
+						//						Color p1 = new Color (0, 1, 0, 0.3f);
+						//						Color p2 = new Color (1, 0, 0, 0.3f);
+						//						Color c = new Color (0, 0, 0, 1.0f);
+						//
+						//
+						Color p1 = new Color (0 , 1 * mask.GetPixel(i,j).grayscale, 0, 0.9f);
+						Color p2 = new Color (1* mask.GetPixel(i,j).grayscale, 0, 0, 0.9f);
+						Color c = new Color (0, 0, 0, 1.0f);
+
+
+						if (tg.pointToOwnerMap [i, j] == 1) {							
+
+							texCombined.SetPixel (i, j, p1);	
+						} else if (tg.pointToOwnerMap [i, j] == 2) {
+							texCombined.SetPixel (i, j, p2);	
+						} else {
+							texCombined.SetPixel (i, j, c);
+						}							
+					}
+				}
+				texCombined.Apply ();
+
+				projector.material.mainTexture = texCombined; 
+
+			}
 		}
 
 	}
