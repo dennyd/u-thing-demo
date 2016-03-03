@@ -9,7 +9,7 @@ using csDelaunay;
 
 [RequireComponent (typeof(MeshFilter), typeof(MeshRenderer))]
 public class TerrainGenerator : MonoBehaviour
-{	
+{
 
 
 
@@ -40,9 +40,6 @@ public class TerrainGenerator : MonoBehaviour
 	public Texture2D texture3;
 	public Texture2D texture4;
 
-
-
-
 	TerrainData terrainData;
 
 	//voronoi
@@ -53,11 +50,21 @@ public class TerrainGenerator : MonoBehaviour
 
 	public Voronoi voronoiDiagram;
 	public List<Texture2D> voronoiTexList;
+	public List<Texture2D> voronoiTexListPlayer1;
+	public List<Texture2D> voronoiTexListPlayer2;
+	public Texture2D texComb;
 
+	// maps
 	public int[,] pointToRegionMap;
+	public int[,] pointToOwnerMap;
+	public int[] regionToOwnerMap;
+	public List<Vector2f> regionToSite;
 
 	void Start ()
 	{
+
+		regionToOwnerMap = new int[VoronoiPolygonNumber];
+
 		GenerateMap ();
 		GenerateTerrain ();
 		//?
@@ -67,20 +74,20 @@ public class TerrainGenerator : MonoBehaviour
 
 	}
 
-	public void GenerateTerrain()
+	public void GenerateTerrain ()
 	{
 
 		int t_width = width;
 		int t_height = height;
 
 		if (terrainData == null) {
-			terrainData = new TerrainData();
+			terrainData = new TerrainData ();
 		}
 
 
 
 //		terrainData.size = new Vector3( t_width/ 16f, terrainHeight, t_height/ 16f );
-		terrainData.size = new Vector3( t_width, terrainHeight, t_height );
+		terrainData.size = new Vector3 (t_width, terrainHeight, t_height);
 		terrainData.heightmapResolution = t_heightmap_resolution;
 		terrainData.alphamapResolution = t_resolution;
 		terrainData.SetHeights (0, 0, map);
@@ -157,7 +164,8 @@ public class TerrainGenerator : MonoBehaviour
 
 
 
-	void ApplyTextures(){
+	void ApplyTextures ()
+	{
 
 //		Material mat = GetComponent<MeshRenderer> ().sharedMaterial;
 //		mat.SetTexture ("_HeightMap2D", heightMap2D);
@@ -172,7 +180,8 @@ public class TerrainGenerator : MonoBehaviour
 	}
 
 
-	void GenerateTexture(){
+	void GenerateTexture ()
+	{
 
 
 		/*
@@ -193,7 +202,7 @@ public class TerrainGenerator : MonoBehaviour
 		splat4.texture = texture4;
 
 		splatVoronoi.texture = voronoiTex;
-		splatVoronoi.tileSize = new Vector2(width,height);
+		splatVoronoi.tileSize = new Vector2 (width, height);
 //		splatVoronoi.tileSize = new Vector2(terrainData.size.x,terrainData.size.y);
 //		Debug.Log (width + " , " + height);
 //		Debug.Log (terrainData.size.x + " , " +terrainData.size.y);
@@ -208,16 +217,14 @@ public class TerrainGenerator : MonoBehaviour
 		};
 
 
-		terrainData.RefreshPrototypes();
+		terrainData.RefreshPrototypes ();
 
 		float[,,] splatMap = new float[terrainData.alphamapResolution, terrainData.alphamapResolution, terrainData.splatPrototypes.Length];
 
-		for (var x = 0; x < terrainData.alphamapWidth; x++)
-		{
-			for (var y = 0; y < terrainData.alphamapHeight; y++)
-			{
+		for (var x = 0; x < terrainData.alphamapWidth; x++) {
+			for (var y = 0; y < terrainData.alphamapHeight; y++) {
 				// voronoi tex
-				splatMap [x, y,4] = 0.3f;
+				splatMap [x, y, 4] = 0.3f;
 
 				if (map [x, y] > 0.9) {
 					splatMap [x, y, 0] = 1;
@@ -250,9 +257,9 @@ public class TerrainGenerator : MonoBehaviour
 
 //					float t1 = Mathf.Lerp (0,1,map [x, y]);
 //					float t2 = Mathf.Lerp (1,0,map [x, y]);
-					float min=0.7f;
+					float min = 0.7f;
 					float max = 0.9f;
-					float t1 = 1- Normalize(map [x, y],max,min);
+					float t1 = 1 - Normalize (map [x, y], max, min);
 					float t2 = 1 - t1;
 
 //					Debug.Log (t1 + " , " +t2 );
@@ -296,7 +303,7 @@ public class TerrainGenerator : MonoBehaviour
 			}
 		}
 
-		terrainData.SetAlphamaps(0, 0, splatMap);
+		terrainData.SetAlphamaps (0, 0, splatMap);
 
 
 	}
@@ -306,13 +313,13 @@ public class TerrainGenerator : MonoBehaviour
 		if (Input.GetMouseButtonDown (1)) {
 			GenerateMap ();
 			GenerateTerrain ();
-			GenerateVoronoi();
+			GenerateVoronoi ();
 			GenerateTexture ();
 
 		}
 
 
-		if(liveGeneration){
+		if (liveGeneration) {
 
 			GenerateMap ();
 			GenerateTerrain ();
@@ -323,133 +330,204 @@ public class TerrainGenerator : MonoBehaviour
 		}
 
 
+
+	}
+
+	void GenerateZoneMeshes(Voronoi vd){
+
+//		vd.Edges.
+
+
 	}
 
 
-	void GenerateVoronoi(){
+	void GenerateVoronoi ()
+	{
 		
-		List<Vector2f> points = new List<Vector2f>();
+		List<Vector2f> points = new List<Vector2f> ();
 		for (int i = 0; i < VoronoiPolygonNumber; i++) {
 //			points.Add(new Vector2f(UnityEngine.Random.Range(0,512), UnityEngine.Random.Range(0,512)));
-			points.Add(new Vector2f(UnityEngine.Random.Range(0,width), UnityEngine.Random.Range(0,height)));
+			points.Add (new Vector2f (UnityEngine.Random.Range (0, width), UnityEngine.Random.Range (0, height)));
 		}
 //		Rectf bounds = new Rectf(0,0,512,512);
-		Rectf bounds = new Rectf(0,0,width,height);
-		Voronoi voronoi = new Voronoi(points,bounds,5);
+		Rectf bounds = new Rectf (0, 0, width, height);
+		Voronoi voronoi = new Voronoi (points, bounds, 5);
 		voronoiDiagram = voronoi;
 
 		sites = voronoi.SitesIndexedByLocation;
 		edges = voronoi.Edges;
 
+		//re-compute maps
+		regionToSite =  ComputeRegionToSite(voronoi);
+//		regionToOwnerMap = ComputeRegionToOwnerMap ();
 
+
+		// goes 1st
+
+		pointToRegionMap = ComputePointToRegionMap (voronoiDiagram); //2nd
+		pointToOwnerMap = ComputePointToOwnerMap (regionToOwnerMap, pointToRegionMap); //3rd
 
 //		Texture2D tx = new Texture2D(512,512);
-		Texture2D tx = new Texture2D(width,height);
+		Texture2D tx = new Texture2D (width, height);
 
-		for (int i=0; i<width; i++){
-			for (int j=0; j<height; j++){
+		for (int i = 0; i < width; i++) {
+			for (int j = 0; j < height; j++) {
 				tx.SetPixel (i, j, Color.black);
 			}	
 		}
 
 		foreach (KeyValuePair<Vector2f,Site> kv in sites) {
-			tx.SetPixel((int)kv.Key.x, (int)kv.Key.y, Color.red);
+			tx.SetPixel ((int)kv.Key.x, (int)kv.Key.y, Color.red);
 		}
+
+
+
 
 		// draw voronoi on textures
 		foreach (Edge edge in edges) {
 			// if the edge doesn't have clippedEnds, if was not within the bounds, dont draw it
-			if (edge.ClippedEnds == null) continue;
-			DrawLine(edge.ClippedEnds[LR.LEFT], edge.ClippedEnds[LR.RIGHT], tx, Color.white);
+			if (edge.ClippedEnds == null)
+				continue;
+					
+			Color p1 = new Color (0, 1, 0, 0.5f);
+			Color p2 = new Color (0, 0, 1, 0.5f);
+			Color p3 = new Color (1, 0, 0, 0.5f);
+			Color c = new Color (1, 1, 1, 0.5f);
+
+
+
+			DrawLine (edge.ClippedEnds [LR.LEFT], edge.ClippedEnds [LR.RIGHT], tx, c);
+
 		}
-//
+
+		for (int i=0;i<VoronoiPolygonNumber;i++){
+
+			List<LineSegment> segments = voronoi.VoronoiBoundarayForSite (regionToSite[i]);
+
+
+			foreach (LineSegment segment in segments){
+//				Debug.Log ("Line: " + segment.p0 + segment.p1);
+
+
+				if (regionToOwnerMap[i]==2){
+					DrawLine (segment.p0, segment.p1, tx, Color.red);
+				}
+
+				if (regionToOwnerMap[i]==1){
+					DrawLine (segment.p0, segment.p1, tx, Color.green);
+				}
+
+			}
+
+
+		}
+
+
+
 		//Debug.Log ("Counter: " + couter);
-		tx.Apply();
+		tx.Apply ();
 		voronoiTex = tx;
 
 
 
 		// PROJECTOR
 
-		GameObject p =  GameObject.FindGameObjectWithTag ("projector");
+		GameObject p = GameObject.FindGameObjectWithTag ("projector");
 		Projector projector = p.GetComponent<Projector> ();
-		projector.transform.position = new Vector3 (width/2,terrainHeight*2,height/2);
-		projector.transform.rotation = Quaternion.Euler(90,0,0);
+		projector.transform.position = new Vector3 (width / 2, terrainHeight * 2, height / 2);
+		projector.transform.rotation = Quaternion.Euler (90, 0, 0);
 
 
 //		Material mat = p.GetComponents<Material> ()[0];
-		var mat = new Material (Shader.Find("Particles/Additive"));
+		var mat = new Material (Shader.Find ("Particles/Additive"));
 //		p.GetComponents<Material> ()[0] = mat;
 		projector.material = mat;
 		projector.orthographicSize = 128;
 
-		long t1 = System.DateTime.Now.Millisecond;
-		pointToRegionMap = ComputePointToRegionArray (voronoiDiagram);
-		Debug.Log("time for ComputePointToRegionArray: "+ (System.DateTime.Now.Millisecond - t1));
-		Texture2D fst = new Texture2D(width,height);
+//		long t1 = System.DateTime.Now.Millisecond;
+//
+//
+//		Debug.Log ("time for ComputePointToRegionArray: " + (System.DateTime.Now.Millisecond - t1));
+		Texture2D fst = new Texture2D (width, height);
 			
-		for (int i=0; i<width; i++){
-			for (int j=0; j<height; j++){
-				fst.SetPixel (i, j, new Color(0,0,0,0));
+		for (int i = 0; i < width; i++) {
+			for (int j = 0; j < height; j++) {
+				fst.SetPixel (i, j, new Color (0, 0, 0, 0));
 			}	
 		}
 
 		foreach (Edge edge in edges) {
 			// if the edge doesn't have clippedEnds, if was not within the bounds, dont draw it
-			if (edge.ClippedEnds == null) continue;
-			DrawLine(edge.ClippedEnds[LR.LEFT], edge.ClippedEnds[LR.RIGHT], fst, new Color(1,1,1,0.5f));
+			if (edge.ClippedEnds == null)
+				continue;
+
+			Color p1 = Color.green;
+			Color p2 = Color.red;
+			Color c = new Color (1, 1, 1, 0.5f);
+
+//			if(pointToOwnerMap[ (int) Math.Floor( edge.ClippedEnds[LR.LEFT].x),(int)Math.Floor( edge.ClippedEnds[LR.LEFT].y)]==1){
+//				c = p1;
+//			}
+//
+//			if(pointToOwnerMap[(int)Math.Floor( edge.ClippedEnds[LR.LEFT].x),(int)Math.Floor( edge.ClippedEnds[LR.LEFT].y)]==2){
+//				c = p2;
+//			}
+
+
+
+
+//
+			DrawLine (edge.ClippedEnds [LR.LEFT], edge.ClippedEnds [LR.RIGHT], fst, c);
+
+
 		}
 
 		voronoiTexList = new List<Texture2D> ();
-
-
+		voronoiTexListPlayer1 = new List<Texture2D> ();
+		voronoiTexListPlayer2 = new List<Texture2D> ();
 
 		for (int i = 0; i < VoronoiPolygonNumber; i++) {
-			Texture2D tex = new Texture2D (width, height);
-			voronoiTexList.Add (tex);
+			voronoiTexList.Add (new Texture2D (width, height));
+			voronoiTexListPlayer1.Add (new Texture2D (width, height));
+			voronoiTexListPlayer2.Add (new Texture2D (width, height));
 		}
+			
 
+		for (int i = 0; i < voronoi.Regions ().Count; i++) {
+			List<Vector2f> region = voronoi.Regions () [i];
 
-		for (int i = 0; i < voronoi.Regions().Count; i++) {
-			List<Vector2f> region = voronoi.Regions()[i];
 			Texture2D tex = voronoiTexList [i];
-			Color[] pixArray = tex.GetPixels ();
-			t1 = System.DateTime.Now.Millisecond;
+			Texture2D texP1 = voronoiTexListPlayer1 [i];
+			Texture2D texP2 = voronoiTexListPlayer2 [i];
 
-			for(int t=0; t<pixArray.Length; t++){
+			Color[] pixArray = tex.GetPixels ();
+			Color[] pixArrayP1 = texP1.GetPixels ();
+			Color[] pixArrayP2 = texP2.GetPixels ();
+
+			for (int t = 0; t < pixArray.Length; t++) {
 				// de-flattering
-				int y = (int) Math.Floor ( t / width  *1.0f );
+				int y = (int)Math.Floor (t / width * 1.0f);
 				int x = t - (y * width);
 
 				pixArray [t] = new Color (0, 0, 0, 0);
+				pixArrayP1[t] = new Color (0, 0, 0, 0);
+				pixArrayP2[t] = new Color (0, 0, 0, 0);
 
-//				if (RegionOfPoint(new Vector2f(x,y),voronoi)==i){
-////					tex.SetPixel (x, y, new Color(1,1,1,0.3f));
-//					pixArray [t] = new Color(1,1,1,0.3f);
-//				}
-				if (pointToRegionMap[x,y]==i){
-					//					tex.SetPixel (x, y, new Color(1,1,1,0.3f));
-					pixArray [t] = new Color(1,1,1,0.3f);
+				if (pointToRegionMap [x, y] == i) {
+					pixArray [t] = new Color (1, 1, 1, 0.3f);
+					pixArrayP1 [t] = new Color (0, 1, 0, 0.3f);
+					pixArrayP2 [t] = new Color (1, 0, 0, 0.3f);
 				}
-//				Debug.Log("time sub: "+ (System.DateTime.Now.Millisecond - t2));
 
-
-			}
-
-			Debug.Log("time for 1 tex: "+ (System.DateTime.Now.Millisecond - t1));
+			}				
 			tex.SetPixels (pixArray);
-//			for (int x=0; x<width; x++){
-//				for (int y=0; y<height; y++){
-//					tex.SetPixel (x, y, new Color(0,0,0,0));
-//
-//					if (RegionOfPoint(new Vector2f(x,y),voronoi)==i){
-//						tex.SetPixel (x, y, new Color(1,1,1,0.3f));
-//					}
-//				}	
-//			}
-
 			tex.Apply ();
 
+			texP1.SetPixels (pixArrayP1);
+			texP1.Apply ();
+
+			texP2.SetPixels (pixArrayP2);
+			texP2.Apply ();
 		}
 			
 
@@ -463,25 +541,26 @@ public class TerrainGenerator : MonoBehaviour
 
 
 
-	// supporting methods
-	// Bresenham line algorithm
-	private void DrawLine(Vector2f p0, Vector2f p1, Texture2D tx, Color c, int offset = 0) {
+
+	private void DrawLine (Vector2f p0, Vector2f p1, Texture2D tx, Color c, int offset = 0)
+	{
 		int x0 = (int)p0.x;
 		int y0 = (int)p0.y;
 		int x1 = (int)p1.x;
 		int y1 = (int)p1.y;
 
-		int dx = Mathf.Abs(x1-x0);
-		int dy = Mathf.Abs(y1-y0);
+		int dx = Mathf.Abs (x1 - x0);
+		int dy = Mathf.Abs (y1 - y0);
 		int sx = x0 < x1 ? 1 : -1;
 		int sy = y0 < y1 ? 1 : -1;
-		int err = dx-dy;
+		int err = dx - dy;
 
 		while (true) {
-			tx.SetPixel(x0+offset,y0+offset,c);
+			tx.SetPixel (x0 + offset, y0 + offset, c);
 
-			if (x0 == x1 && y0 == y1) break;
-			int e2 = 2*err;
+			if (x0 == x1 && y0 == y1)
+				break;
+			int e2 = 2 * err;
 			if (e2 > -dy) {
 				err -= dy;
 				x0 += sx;
@@ -495,50 +574,94 @@ public class TerrainGenerator : MonoBehaviour
 
 
 
-	int RegionOfPoint(Vector2f p, Voronoi vd){
+	int RegionOfPoint (Vector2f p, Voronoi vd)
+	{
 
 		Dictionary<Vector2f,Site> sites = vd.SitesIndexedByLocation;
 		float dist = Mathf.Infinity;			 
-		Vector2f closest = new Vector2f(-1,-1);
+		Vector2f closest = new Vector2f (-1, -1);
 
 		foreach (KeyValuePair<Vector2f,Site> kv in sites) {
 
-			Vector3 temp1 = new Vector3 (kv.Key.x,0,kv.Key.y);
-			Vector3 temp2 = new Vector3 (p.x,0,p.y);
-			float d = Vector3.Distance (temp1,temp2);
+			Vector3 temp1 = new Vector3 (kv.Key.x, 0, kv.Key.y);
+			Vector3 temp2 = new Vector3 (p.x, 0, p.y);
+			float d = Vector3.Distance (temp1, temp2);
 
 			if (d < dist) {
 				dist = d;
-				closest = new Vector2f(kv.Key.x,kv.Key.y);
+				closest = new Vector2f (kv.Key.x, kv.Key.y);
 			}
 
 		}
 			
 		if (closest.x > -1) {
-			int index = vd.Regions ().IndexOf (vd.Region(closest));
+			int index = vd.Regions ().IndexOf (vd.Region (closest));
 			return index;
 		}
 
 		return -1;
 	}
 
-	int[,] ComputePointToRegionArray(Voronoi vd){
-
+	int[,] ComputePointToRegionMap (Voronoi vd)
+	{
 		int width = this.width;
 		int height = this.height;
 
-		int[,] outArr = new int[width,height];
+		int[,] outArr = new int[width, height];
 
 
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
 
-				outArr [x,y] = RegionOfPoint (new Vector2f(x,y),vd);
+				outArr [x, y] = RegionOfPoint (new Vector2f (x, y), vd);
 
 			}
 		}
-
 		return outArr;	
 	}
 
+	public int[,] ComputePointToOwnerMap (int[] regionToOwnerMap, int[,] pointToRegionMap)
+	{
+
+		int[,] map = new int[width, height];
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+
+				int region = pointToRegionMap [x, y];
+				int owner = regionToOwnerMap [region];
+				map [x, y] = owner;
+			}
+		}
+			
+		return map;
+	}
+
+	int[] ComputeRegionToOwnerMap ()
+	{
+		int[] map = new int[VoronoiPolygonNumber];
+
+
+
+		for (int i = 0; i < VoronoiPolygonNumber; i++) {
+			map [i] = 0;
+		}
+//
+//		map [0] = 1;
+//		map [5] = 2;
+
+		return map;
+	}
+
+
+	List<Vector2f> ComputeRegionToSite (Voronoi vd){
+		List<Vector2f> o = new List<Vector2f>();
+		Dictionary<Vector2f,Site> sites = vd.SitesIndexedByLocation;
+
+		foreach (KeyValuePair<Vector2f,Site> kv in sites) {
+			o.Add (kv.Key);
+		}
+			
+		return o;
+	}
 }
