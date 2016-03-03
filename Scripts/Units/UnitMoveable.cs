@@ -33,6 +33,32 @@ public class UnitMoveable : MonoBehaviour {
 				}
 				animator.SetFloat ("Speed", movementSpeed);
 				transform.position = v;
+
+
+
+				// update territory
+				GameObject terrainGO = GameObject.FindGameObjectWithTag ("terrain");
+				TerrainGenerator tg = terrainGO.GetComponent<TerrainGenerator> ();
+
+				int x = (int)Mathf.Floor (transform.position.x);
+				int y = (int)Mathf.Floor (transform.position.z);
+
+
+				int region = tg.pointToRegionMap[x,y];
+
+				tg.regionToOwnerMap [region] = 
+					this.GetComponent<UnitBelonging> ().player;
+
+				tg.pointToOwnerMap = tg.ComputePointToOwnerMap (tg.regionToOwnerMap,tg.pointToRegionMap);
+
+				// update projector
+				if(this.GetComponent<UnitBelonging> ().territory != region){
+					this.GetComponent<UnitBelonging> ().territory = region;
+					MouseController mc = tg.GetComponent<MouseController>();
+					mc.UpdateProjection ();
+				}
+
+
 			}
 		}
 	}
