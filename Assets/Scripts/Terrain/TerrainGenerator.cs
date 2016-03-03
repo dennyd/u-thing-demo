@@ -544,4 +544,9 @@ public class TerrainGenerator : MonoBehaviour
 		return outArr;	
 	}
 
+	public float getElevationForPoint(int x, int y) {
+		if (map != null) return map [y, x];
+		return -1;
+	}
+
 }

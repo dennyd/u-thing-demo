@@ -24,7 +24,7 @@ public class MouseController : MonoBehaviour
 //			Debug.Log ( transform.worldToLocalMatrix *  hitInfo.point);
 			int x = (int)Mathf.Floor ((transform.worldToLocalMatrix * hitInfo.point).x);
 			int y = (int)Mathf.Floor ((transform.worldToLocalMatrix * hitInfo.point).z);
-//			Debug.Log ("X: " + x + " Y: " + y);
+//			Debug.Log ("X: " + x + " Y: " + y + " M: " + gameObject.GetComponent<TerrainGenerator>().getElevationForPoint(x, y));
 
 			GameObject terrainGO = GameObject.FindGameObjectWithTag ("terrain");
 //			terrainGen<TerrainGenerator> ();
