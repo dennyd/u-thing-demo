@@ -17,7 +17,10 @@ public class Combat : MonoBehaviour {
 	private float lastShot, lastShotTaken;
 	private Animator animator;
 	private UnitBelonging _gameData;
+	private Projector _p;
+	private Texture2D _tex;
 
+	public float healthPercent;
 	void Start() {
 		if (health == 0) health = baseHealth;
 		if (attack == 0) attack = baseAttack;
@@ -32,9 +35,20 @@ public class Combat : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
+
+		try {
+
+			_p = GetComponent<UnitBehaviour> ().selectionCircle.GetComponent<Projector>();
+			_tex = (Texture2D) Instantiate( _p.material.GetTexture ("_ShadowTex"));
+			_p.material.SetTexture("_ShadowTex", _tex);
+		} catch {
+			Debug.LogWarning ("Projector not yet ready");
+		}
+
 		if (isAlive() && target != null) {
 			if (Vector3.Distance (transform.position, target.transform.position) < targetRange) {
 				transform.LookAt (target.transform.position);
+				GetComponent<UnitBehaviour> ().resetCircle ();
 				GetComponent<Animator> ().SetBool ("HasTarget", true);
 
 				float deltaTime = Time.time - lastShot;
@@ -49,6 +63,32 @@ public class Combat : MonoBehaviour {
 		if (!isAlive() && lastShotTaken != null && (Time.time - lastShotTaken) > 5) {
 			Destroy (gameObject);
 		}
+	}
+
+	void generateTexture() {
+		
+		Color whiteTransparent = Color.white;
+		whiteTransparent.a = 0.0f;
+
+		if (_p != null && _tex != null) {
+			
+			for (int i = 0; i < _tex.width; i++) {
+				for (int j = 0; j < _tex.height; j++) {
+					
+					if (getAngle(new Vector2(_tex.width / 2, _tex.height / 2), new Vector2(i, j)) / 360 <  healthPercent) {
+						_tex.SetPixel(i, j, whiteTransparent);
+					} else _tex.SetPixel (i, j, _tex.GetPixel (i, j));
+
+				}
+			}
+			_tex.Apply ();
+		}
+		
+	}
+
+	private float getAngle(Vector2 fromVector2, Vector2 toVector2) {
+
+		return 180 + Mathf.Atan2(fromVector2.y - toVector2.y, fromVector2.x - toVector2.x) * 180 / Mathf.PI;
 	}
 
 	void shoot() {
@@ -76,7 +116,7 @@ public class Combat : MonoBehaviour {
 	}
 
 	public void SetTarget(GameObject target) {
-		if (!target.GetComponent<UnitBelonging> ().isSamePlayerAs(_gameData)) {
+		if (target != null && !target.GetComponent<UnitBelonging> ().isSamePlayerAs(_gameData)) {
 			
 			if (target == gameObject)
 				this.target = null;
@@ -108,6 +148,8 @@ public class Combat : MonoBehaviour {
 
 	private void updateHealth() {
 		try {
+			healthPercent = 1 - health / baseHealth;
+			generateTexture ();
 			animator.SetFloat("Health", health);
 		} catch {
 			Debug.Log ("Cannot set health in animator");

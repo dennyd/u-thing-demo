@@ -27,6 +27,8 @@ public class UnitBehaviour : MonoBehaviour {
 		Projector circleProjector = (Projector) selectionCircle.GetComponent<Projector> ();
 		Material mat = circleProjector.material;
 		circleProjector.material = new Material(mat);
+
+		resetCircle ();
 	}
 	
 	// Update is called once per frame
@@ -50,5 +52,15 @@ public class UnitBehaviour : MonoBehaviour {
 	public void SetCircleId(int id) {
 		this.id = id;
 		selectionCircle.name = "Projector#" + id;
+	}
+
+
+	public void resetCircle() {
+		try {
+			Projector p = GetComponent<UnitBehaviour> ().selectionCircle.GetComponent<Projector>();
+			p.transform.eulerAngles = new Vector3(90, 270, 0);
+		} catch {
+			Debug.Log ("Cannot rotate projection");
+		}
 	}
 }

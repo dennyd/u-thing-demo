@@ -32,7 +32,7 @@ public class Cloneable : MonoBehaviour {
 	}
 
 	// Update is called once per frame
-	void Update () {
+	void Update () {	
 		foreach (Renderer rend in transform.GetComponentsInChildren<Renderer>()) {
 			rend.material.color = currentColor;
 		}

@@ -39,6 +39,7 @@ public class UnitMoveable : MonoBehaviour {
 
 	public void MoveTo(Vector3 vPoint) {
 		transform.LookAt (new Vector3(vPoint.x, transform.position.y, vPoint.z));
+		GetComponent<UnitBehaviour> ().resetCircle ();
 		vDestination = vPoint;
 		time = Time.time;
 		dist = Vector3.Distance (transform.position, vPoint);
