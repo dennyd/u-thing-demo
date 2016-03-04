@@ -41,7 +41,24 @@ public class Cloneable : MonoBehaviour {
 	void OnMouseOver() {
 		if (behaviour.Selected) {
 			if (Input.GetMouseButtonDown (2)) {
-				GameObject instance = (GameObject) Instantiate (clonePrefab, transform.position + new Vector3(Mathf.Sign(Random.Range(-1, 1)) * Random.Range(1, 5), 10, Mathf.Sign(Random.Range(-1, 1)) * Random.Range(1, 5)), transform.rotation);
+				clone ();
+			}
+		}
+	}
+
+	public GameObject clone() {
+
+		bool canClone = true;
+		GameObject instance = null;
+		try {
+
+			canClone = FindObjectOfType<GameController>().canClone(GetComponent<UnitBelonging>());
+
+		} finally {
+
+			if (canClone) {
+					
+				instance = (GameObject)Instantiate (clonePrefab, transform.position + new Vector3 (Mathf.Sign (Random.Range (-1, 1)) * Random.Range (1, 5), 10, Mathf.Sign (Random.Range (-1, 1)) * Random.Range (1, 5)), transform.rotation);
 				float elevation = getElevation ();
 				string tex;
 				if (elevation >= 0.8)
@@ -53,13 +70,16 @@ public class Cloneable : MonoBehaviour {
 				else
 					tex = "four";
 				Color mixBaseColor = currentColor;
-				if (mixBaseColor.Equals(colorScheme.def)) mixBaseColor = colorScheme.getColor(tex);
-				instance.GetComponent<Cloneable>().setColor(mixColors(mixBaseColor, colorScheme.getColor(tex)));
+				if (mixBaseColor.Equals (colorScheme.def))
+					mixBaseColor = colorScheme.getColor (tex);
+				instance.GetComponent<Cloneable> ().setColor (mixColors (mixBaseColor, colorScheme.getColor (tex)));
 				instance.GetComponent<UnitBehaviour> ().SetSelect (false);
-				instance.GetComponent<UnitBehaviour> ().SetCircleId(GetComponent<UnitBehaviour>().id + 1);
+				instance.GetComponent<UnitBehaviour> ().SetCircleId (GetComponent<UnitBehaviour> ().id + 1);
 
 			}
 		}
+
+		return instance;
 	}
 
 	public void setColor(Color c) {

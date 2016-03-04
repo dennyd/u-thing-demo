@@ -18,17 +18,26 @@ public class UnitBehaviour : MonoBehaviour {
 	public CircleColorScheme colorScheme = new CircleColorScheme();
 	// Use this for initialization
 	void Start () {
-		selectionCircle = Instantiate( selectionCirclePrefab );
-		selectionCircle.transform.SetParent( transform, false );
-		selectionCircle.transform.eulerAngles = new Vector3( 90, 0, 0 ); 
+		try {
 
-		selectionCircle.name = "Projector#" + id;
+			Projector circle = gameObject.GetComponentInChildren<Projector>();
+			if (circle) Destroy(circle.gameObject);
+			circle = gameObject.GetComponentInChildren<Projector>();
 
-		Projector circleProjector = (Projector) selectionCircle.GetComponent<Projector> ();
-		Material mat = circleProjector.material;
-		circleProjector.material = new Material(mat);
+		} finally {
+			
+			selectionCircle = Instantiate (selectionCirclePrefab);
+			selectionCircle.transform.SetParent (transform, false);
+			selectionCircle.transform.eulerAngles = new Vector3 (90, 0, 0); 
 
-		resetCircle ();
+			selectionCircle.name = "Projector#" + id;
+
+			Projector circleProjector = (Projector)selectionCircle.GetComponent<Projector> ();
+			Material mat = Instantiate (circleProjector.material) as Material;
+			circleProjector.material = new Material (mat);
+
+			resetCircle ();
+		}
 	}
 	
 	// Update is called once per frame
@@ -42,7 +51,9 @@ public class UnitBehaviour : MonoBehaviour {
 		} else if (!GetComponent<UnitBelonging> ().isMainPlayer()) {
 			selectionTintColor = colorScheme.enemyColor;
 		}
-		selectionCircle.GetComponent<Projector> ().material.SetColor ("_Color", selectionTintColor);
+		if (selectionCircle != null) {
+			selectionCircle.GetComponent<Projector> ().material.SetColor ("_Color", selectionTintColor);
+		}
 	}
 
 	public void SetSelect(bool selectStatus) {
@@ -51,7 +62,7 @@ public class UnitBehaviour : MonoBehaviour {
 
 	public void SetCircleId(int id) {
 		this.id = id;
-		selectionCircle.name = "Projector#" + id;
+		if (selectionCircle != null) selectionCircle.name = "Projector#" + id;
 	}
 
 

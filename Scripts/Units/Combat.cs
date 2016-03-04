@@ -12,7 +12,7 @@ public class Combat : MonoBehaviour {
 	public float baseAttack = 15;
 	public float attack = 0;
 
-	public float targetRange = 5.0f;
+	public float targetRange = 10.0f;
 
 	private float lastShot, lastShotTaken;
 	private Animator animator;
@@ -39,7 +39,10 @@ public class Combat : MonoBehaviour {
 		try {
 
 			_p = GetComponent<UnitBehaviour> ().selectionCircle.GetComponent<Projector>();
-			_tex = (Texture2D) Instantiate( _p.material.GetTexture ("_ShadowTex"));
+			_tex = Instantiate( _p.material.GetTexture ("_ShadowTex")) as Texture2D;
+//			Texture2D original = _p.material.GetTexture ("_ShadowTex") as Texture2D;
+//			_tex = new Texture2D(original.width, original.height);
+//			_tex.SetPixels(original.GetPixels());
 			_p.material.SetTexture("_ShadowTex", _tex);
 		} catch {
 			Debug.LogWarning ("Projector not yet ready");

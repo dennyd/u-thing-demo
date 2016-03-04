@@ -54,6 +54,8 @@ public class TerrainGenerator : MonoBehaviour
 	public List<Texture2D> voronoiTexList;
 	public List<Texture2D> voronoiTexListPlayer1;
 	public List<Texture2D> voronoiTexListPlayer2;
+	public List<Texture2D> voronoiTexListPlayer3;
+	public List<Texture2D> voronoiTexListPlayer4;
 	public Texture2D texComb;
 
 	// maps
@@ -80,13 +82,18 @@ public class TerrainGenerator : MonoBehaviour
 
 		regionToOwnerMap = new int[VoronoiPolygonNumber];
 
+		RegenerateAll ();
+	}
+
+	public void RegenerateAll() {
+
+
 		GenerateMap ();
 		GenerateTerrain ();
 		//?
 		GenerateVoronoi ();
 
 		GenerateTexture ();
-
 	}
 
 	public void GenerateTerrain ()
@@ -126,16 +133,17 @@ public class TerrainGenerator : MonoBehaviour
 			terrainData = new TerrainData ();
 		}
 
-		terrainData.thickness = 20;
-
 		terrainData.heightmapResolution = t_heightmap_resolution;
 		terrainData.alphamapResolution = t_resolution;
 
-		//		terrainData.size = new Vector3( t_width/ 16f, terrainHeight, t_height/ 16f );
-		terrainData.size = new Vector3 (t_width, terrainHeight, t_height);
+		terrainData.thickness = 100;
+
+//		terrainData.size = new Vector3( t_width/ 16f, terrainHeight, t_height/ 16f );
+		terrainData.size = new Vector3( t_width, terrainHeight, t_height );
 
 		terrainData.SetHeights (0, 0, map);
 		GameObject activeTerrain;
+
 		if (Terrain.activeTerrain != null) {
 			//			Debug.Log ("> Active terrain exists");
 			Terrain t = Terrain.activeTerrain;
@@ -144,6 +152,7 @@ public class TerrainGenerator : MonoBehaviour
 			t.materialTemplate = mat;
 
 			t.terrainData = terrainData;
+			t.tag = "terrain";
 
 		} else {
 			Terrain.CreateTerrainGameObject (terrainData);
@@ -610,11 +619,15 @@ public class TerrainGenerator : MonoBehaviour
 		voronoiTexList = new List<Texture2D> ();
 		voronoiTexListPlayer1 = new List<Texture2D> ();
 		voronoiTexListPlayer2 = new List<Texture2D> ();
+		voronoiTexListPlayer3 = new List<Texture2D> ();
+		voronoiTexListPlayer4 = new List<Texture2D> ();
 
 		for (int i = 0; i < VoronoiPolygonNumber; i++) {
 			voronoiTexList.Add (new Texture2D (width, height));
 			voronoiTexListPlayer1.Add (new Texture2D (width, height));
 			voronoiTexListPlayer2.Add (new Texture2D (width, height));
+			voronoiTexListPlayer3.Add (new Texture2D (width, height));
+			voronoiTexListPlayer4.Add (new Texture2D (width, height));
 		}
 
 
@@ -624,10 +637,14 @@ public class TerrainGenerator : MonoBehaviour
 			Texture2D tex = voronoiTexList [i];
 			Texture2D texP1 = voronoiTexListPlayer1 [i];
 			Texture2D texP2 = voronoiTexListPlayer2 [i];
+			Texture2D texP3 = voronoiTexListPlayer3 [i];
+			Texture2D texP4 = voronoiTexListPlayer4 [i];
 
 			Color[] pixArray = tex.GetPixels ();
 			Color[] pixArrayP1 = texP1.GetPixels ();
 			Color[] pixArrayP2 = texP2.GetPixels ();
+			Color[] pixArrayP3 = texP3.GetPixels ();
+			Color[] pixArrayP4 = texP4.GetPixels ();
 
 			for (int t = 0; t < pixArray.Length; t++) {
 				// de-flattering
@@ -637,11 +654,15 @@ public class TerrainGenerator : MonoBehaviour
 				pixArray [t] = new Color (0, 0, 0, 0);
 				pixArrayP1[t] = new Color (0, 0, 0, 0);
 				pixArrayP2[t] = new Color (0, 0, 0, 0);
+				pixArrayP3[t] = new Color (0, 0, 0, 0);
+				pixArrayP4[t] = new Color (0, 0, 0, 0);
 
 				if (pointToRegionMap [x, y] == i) {
 					pixArray [t] = new Color (1, 1, 1, 0.5f);
 					pixArrayP1 [t] = new Color (1, 1, 1, 0.5f);
 					pixArrayP2 [t] = new Color (1, 1, 1, 0.5f);
+					pixArrayP3 [t] = new Color (1, 1, 1, 0.5f);
+					pixArrayP4 [t] = new Color (1, 1, 1, 0.5f);
 				}
 
 			}				
@@ -653,6 +674,12 @@ public class TerrainGenerator : MonoBehaviour
 
 			texP2.SetPixels (pixArrayP2);
 			texP2.Apply ();
+
+			texP2.SetPixels (pixArrayP3);
+			texP3.Apply ();
+
+			texP2.SetPixels (pixArrayP4);
+			texP4.Apply ();
 		}
 
 		//		vdTex = fst;
@@ -760,7 +787,8 @@ public class TerrainGenerator : MonoBehaviour
 			for (int y = 0; y < height; y++) {
 
 				int region = pointToRegionMap [x, y];
-				int owner = regionToOwnerMap [region];
+				int owner = 0;
+				if (region > 0 && region < regionToOwnerMap.Length) owner = regionToOwnerMap[region];
 				map [x, y] = owner;
 			}
 		}
