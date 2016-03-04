@@ -179,12 +179,12 @@ public class GameController : MonoBehaviour {
 			ai.mapSettings = mapSettings;
 		}
 
-		if (gameSettings.playerNumber > 4) {
+		if (gameSettings.playerNumber > 3) {
 
 			// Player 4
 			unit = (GameObject) Instantiate (
 				prefabPresets.unitPrefab, 
-				new Vector3 (advancedSettings.playerUnitSpawnPlace.x, mapSettings.height, advancedSettings.playerUnitSpawnPlace.y - advancedSettings.playerUnitSpawnPlace.y),
+				new Vector3 (advancedSettings.playerUnitSpawnPlace.x, mapSettings.height, mapSettings.size - advancedSettings.playerUnitSpawnPlace.y),
 				Quaternion.identity
 			);
 
