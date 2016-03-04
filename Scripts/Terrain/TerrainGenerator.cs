@@ -58,14 +58,17 @@ public class TerrainGenerator : MonoBehaviour
 
 	void Start ()
 	{
+		RegenerateAll ();
+
+	}
+
+	public void RegenerateAll () {
 		GenerateVoronoi ();
 
 		GenerateMap ();
 		GenerateTerrain ();
-		//?
 
 		GenerateTexture ();
-
 	}
 
 	public void GenerateTerrain()
@@ -81,17 +84,19 @@ public class TerrainGenerator : MonoBehaviour
 		terrainData.heightmapResolution = t_heightmap_resolution;
 		terrainData.alphamapResolution = t_resolution;
 
-
+		terrainData.thickness = 100;
 
 //		terrainData.size = new Vector3( t_width/ 16f, terrainHeight, t_height/ 16f );
 		terrainData.size = new Vector3( t_width, terrainHeight, t_height );
 
 		terrainData.SetHeights (0, 0, map);
 		GameObject activeTerrain;
+
 		if (Terrain.activeTerrain != null) {
 //			Debug.Log ("> Active terrain exists");
 			Terrain t = Terrain.activeTerrain;
 			t.terrainData = terrainData;
+			t.tag = "terrain";
 
 		} else {
 //			Debug.Log ("> No active terrain");

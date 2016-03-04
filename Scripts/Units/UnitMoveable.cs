@@ -8,7 +8,7 @@ public class UnitMoveable : MonoBehaviour {
 	private Vector3 vDestination;
 	private Animator animator;
 
-	public float movementSpeed = 2.0f;
+	public float movementSpeed = 5.0f;
 	public float destinationTolerance = 1f;
 	// Use this for initialization
 	void Start () {
@@ -18,8 +18,9 @@ public class UnitMoveable : MonoBehaviour {
 
 	private float dist, time;
 	// Update is called once per frame
-	void FixedUpdate () {
+	void Update () {
 		if (isMoving) {
+			vDestination.y = transform.position.y;
 			if (Vector3.Distance(transform.position, vDestination) <= destinationTolerance) {
 				isMoving = false;
 				animator.SetFloat ("Speed", 0);
