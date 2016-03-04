@@ -203,8 +203,8 @@ public class MouseController : MonoBehaviour
 			for (int j = 0; j < height; j++) {	
 				Color p1 = new Color (0 , 1, 0, mask.GetPixel(i,j).grayscale);
 				Color p2 = new Color (1, 0, 0,  mask.GetPixel(i,j).grayscale);
-				Color p3 = new Color (0.8f, 0.4f, 0f, (float) mask.GetPixel(i,j).grayscale);
-				Color p4 = new Color (0.8f, 0f, 0.8f, (float) mask.GetPixel(i,j).grayscale);
+				Color p3 = new Color (1f, 0.5f, 0f, (float) mask.GetPixel(i,j).grayscale);
+				Color p4 = new Color (1f, 0f, 0.5f, (float) mask.GetPixel(i,j).grayscale);
 				Color c = new Color (0.5f, 0.5f, 0.5f, 0f);
 				c = Color.gray;
 				c.a = 0.95f;

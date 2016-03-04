@@ -120,9 +120,8 @@ public class MovementController : MonoBehaviour {
 
 	public void activateUnit(GameObject u, bool autoAdd = true) {
 		
-//		if (!u.GetComponent<UnitBelonging> ().isMainPlayer()) //TODO CONTROLL player 2
-//			Debug.Log("XXXx");
-//			return;
+		if (!u.GetComponent<UnitBelonging> ().isMainPlayer()) 
+			return;
 		try {
 			u.GetComponent<UnitBehaviour> ().SetSelect(true);
 			u.GetComponent<Animator> ().SetBool("Selected", true);
