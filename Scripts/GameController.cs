@@ -61,6 +61,8 @@ public class GameController : MonoBehaviour {
 		_c = (GameObject) Instantiate (prefabPresets.camera, Vector3.zero, Quaternion.identity);
 		_l = (GameObject) Instantiate (prefabPresets.lightSet, new Vector3(0, 100, 0), Quaternion.identity);
 
+		_t.tag = "terrain";
+
 		_t.width = mapSettings.size;
 		_t.height = mapSettings.size;
 

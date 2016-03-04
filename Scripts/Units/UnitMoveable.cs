@@ -1,7 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections;
+using System;
+using System.Collections.Generic;
 
-public class UnitMoveable : MonoBehaviour {
+public class UnitMoveable : MonoBehaviour
+{
 
 
 	private bool isMoving = false;
@@ -11,7 +15,8 @@ public class UnitMoveable : MonoBehaviour {
 	public float movementSpeed = 5.0f;
 	public float destinationTolerance = 1f;
 	// Use this for initialization
-	void Start () {
+	void Start ()
+	{
 		isMoving = false;
 		animator = GetComponent<Animator> ();
 	}
@@ -29,21 +34,104 @@ public class UnitMoveable : MonoBehaviour {
 				float fracJourney = distCovered / dist;
 				Vector3 v = Vector3.Lerp (transform.position, vDestination, fracJourney);
 				RaycastHit hit;
-				if (Physics.Raycast (v, Vector3.down, out hit, 5.0f)) {
-					v.y = hit.point.y + GetComponent<Collider>().bounds.extents.y;
-				}
+//				if (Physics.Raycast (v, Vector3.down, out hit, 5.0f)) {
+//					v.y = hit.point.y + GetComponent<Collider>().bounds.extents.y;
+//				}
 				animator.SetFloat ("Speed", movementSpeed);
 				transform.position = v;
+
+				captureTerritory ();
+
+
+
+
+
+
+
 			}
 		}
+
+//		Debug.Log ("move script time: "+  (System.DateTime.Now.Millisecond-t1));
 	}
 
-	public void MoveTo(Vector3 vPoint) {
-		transform.LookAt (new Vector3(vPoint.x, transform.position.y, vPoint.z));
+	public void MoveTo (Vector3 vPoint)
+	{
+		transform.LookAt (new Vector3 (vPoint.x, transform.position.y, vPoint.z));
 		GetComponent<UnitBehaviour> ().resetCircle ();
 		vDestination = vPoint;
 		time = Time.time;
 		dist = Vector3.Distance (transform.position, vPoint);
 		isMoving = true;
 	}
+
+
+
+	public void captureTerritory(){
+
+		// update territory
+		GameObject terrainGO = GameObject.FindGameObjectWithTag ("terrain");
+		TerrainGenerator tg = terrainGO.GetComponent<TerrainGenerator> ();
+		MouseController mc = tg.GetComponent<MouseController> ();
+
+		int x = (int)Mathf.Floor (transform.position.x);
+		int y = (int)Mathf.Floor (transform.position.z);
+
+
+		int region = tg.pointToRegionMap [x, y];
+
+		//				List<Combat> combats;
+		//				bool success = tg.regionToUnitMap.TryGetValue(region, out combats);
+		//
+		//
+
+		UnitBelonging[] objs = FindObjectsOfType<UnitBelonging> ();
+
+		bool empty = true;
+		bool selfOnly = true;
+		int selfCalls = 0;
+		for (int i = 0; i < objs.Length; i++) {
+			if (objs [i].territory == region) {
+				empty = false;
+				if (objs [i] == GetComponent<UnitBelonging> ()) {
+
+				} else {
+					selfOnly = false;
+				}
+
+			}
+		}
+
+		//				if(selfCalls == objs.Length){
+		//					selfOnly = true;
+		//				}
+		//
+		this.GetComponent<UnitBelonging> ().territory = region;
+
+
+		if (empty) {					
+
+			// if it does not belong to the unit - re-draw
+			if (tg.regionToOwnerMap [region] != GetComponent<UnitBelonging> ().player) {
+				tg.regionToOwnerMap [region] = GetComponent<UnitBelonging> ().player;
+				this.GetComponent<UnitBelonging> ().territory = region;
+				tg.pointToOwnerMap = tg.ComputePointToOwnerMap (tg.regionToOwnerMap, tg.pointToRegionMap);
+				mc.UpdateProjection ();							
+			}
+
+
+		} else {
+			// ocupied
+			if (selfOnly) {
+				if (tg.regionToOwnerMap [region] != GetComponent<UnitBelonging> ().player) {
+					tg.regionToOwnerMap [region] = GetComponent<UnitBelonging> ().player;
+					this.GetComponent<UnitBelonging> ().territory = region;
+					tg.pointToOwnerMap = tg.ComputePointToOwnerMap (tg.regionToOwnerMap, tg.pointToRegionMap);
+					mc.UpdateProjection ();							
+				}
+			}
+		}
+
+
+	}
+
 }
