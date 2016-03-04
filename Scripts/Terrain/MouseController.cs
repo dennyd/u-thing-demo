@@ -187,8 +187,9 @@ public class MouseController : MonoBehaviour
 			for (int j = 0; j < height; j++) {	
 				Color p1 = new Color (0 , 1, 0, mask.GetPixel(i,j).grayscale/4);
 				Color p2 = new Color (1, 0, 0,  mask.GetPixel(i,j).grayscale/4);
-				Color c = new Color (0.5f, 0.5f, 0.5f, 0.5f);
-
+				Color c = new Color (0.5f, 0.5f, 0.5f, 0f);
+				c = Color.gray;
+				c.a = 0.95f;
 				if (tg.pointToOwnerMap [i, j] == 1) {							
 					texCombined.SetPixel (i, j, p1);	
 				} else if (tg.pointToOwnerMap [i, j] == 2) {
@@ -200,8 +201,9 @@ public class MouseController : MonoBehaviour
 		}
 
 		texCombined.Apply ();
+		Texture2D bluured =  tg.Blur (texCombined,4);
 		//		Debug.Log ("UpdateProjection time:" + (System.DateTime.Now.Millisecond-t1));
-		projector.material.mainTexture = texCombined; 
+		projector.material.mainTexture = bluured; 
 	}
 
 

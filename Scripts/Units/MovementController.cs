@@ -119,7 +119,7 @@ public class MovementController : MonoBehaviour {
 	}
 
 	public void activateUnit(GameObject u, bool autoAdd = true) {
-		if (!u.GetComponent<UnitBelonging> ().isMainPlayer())
+		if (!u.GetComponent<UnitBelonging> ().isMainPlayer()) //TODO CONTROLL player 2
 			return;
 		try {
 			u.GetComponent<UnitBehaviour> ().SetSelect(true);

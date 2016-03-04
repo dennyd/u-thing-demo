@@ -15,10 +15,24 @@ Shader "Custom/Terrain/Diffuse" {
 	}
 
 	CGINCLUDE
-		#pragma surface surf Lambert vertex:SplatmapVert finalcolor:SplatmapFinalColor finalprepass:SplatmapFinalPrepass finalgbuffer:SplatmapFinalGBuffer
+		#pragma surface surf Lambert vertex:SplatmapVert finalcolor:SplatmapFinalColor finalprepass:SplatmapFinalPrepass finalgbuffer:SplatmapFinalGBuffer Ramp
 		#pragma multi_compile_fog
 		#include "TerrainSplatmapCommon.cginc"
 
+//		inline half4 LightingToonRamp (SurfaceOutput s, half3 lightDir, half atten){
+//        #ifndef USING_DIRECTIONAL_LIGHT
+//        lightDir = normalize(lightDir);
+//        #endif
+//        // Wrapped lighting
+//        half d = dot (s.Normal, lightDir) * 0.5 + 0.5;
+//        // Applied through ramp
+//        half3 ramp = tex2D (_Ramp, float2(d,d)).rgb;
+//        half4 c;
+//        c.rgb = s.Albedo * _LightColor0.rgb * ramp * (atten * 2);
+//        c.a = 0;
+//        return c;
+//    }
+//
 		void surf(Input IN, inout SurfaceOutput o)
 		{
 			half4 splat_control;

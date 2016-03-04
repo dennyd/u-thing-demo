@@ -31,6 +31,7 @@ public class TerrainGenerator : MonoBehaviour
 	//public float meshScale;
 
 	private float[,] map;
+
 	private float mapLowestVal = 0;
 	private float mapHighestVal = 0;
 
@@ -61,7 +62,13 @@ public class TerrainGenerator : MonoBehaviour
 	public int[] regionToOwnerMap;
 	public List<Vector2f> regionToSite;
 	public Texture2D vdTex;
+
+
+	Material terrainMat;
+	Texture2D terrainMapTex ;
 	void Start ()
+
+
 	{
 
 		regionToOwnerMap = new int[VoronoiPolygonNumber];
@@ -77,13 +84,34 @@ public class TerrainGenerator : MonoBehaviour
 
 	public void GenerateTerrain ()
 	{
+		Material mat = new Material (Shader.Find ("Custom/ToonTerrainFirstPass"));
+		// map to tex2d
+		Texture2D mapTex = new Texture2D(width,height);
+		terrainMapTex = mapTex;
+		for (var x = 0; x < width; x++) {
+			for (var y = 0; y < height; y++) {
+				float grad=0f;
+				float off= 0.1f;
+				mapTex.SetPixel (x, y, new Color (0.5f + ((map[x,y]*grad))-off , 
+					0.5f + ((map[x,y]*grad))-off,
+					0.5f + ((map[x,y]*grad))-off,0.5f));
 
-		var mat = new Material (Shader.Find ("Custom/Terrain/Diffuse"));
+//				mapTex.SetPixel (x, y, Color.white);
+
+			}
+		}
+		mapTex.Apply ();
+		mat.SetTexture ("_Ramp",mapTex);
+
+
+		terrainMat = mat;
+//		var mat = new Material (Shader.Find ("Custom/Terrain/Diffuse"));
+
 		mat.SetTexture("_MainTex" , new Texture2D(width,height)); //set the texture properties of the shader
 		mat.SetTexture("_MainTex2", new Texture2D(width,height));
 		mat.SetTexture("_MainTex3", new Texture2D(width,height));
 		mat.SetTexture("_MainTex4", new Texture2D(width,height));
-
+		//mat.SetTexture ("_Ramp");
 		int t_width = width;
 		int t_height = height;
 
@@ -91,6 +119,7 @@ public class TerrainGenerator : MonoBehaviour
 			terrainData = new TerrainData ();
 		}
 
+		terrainData.thickness = 20;
 
 		terrainData.heightmapResolution = t_heightmap_resolution;
 		terrainData.alphamapResolution = t_resolution;
@@ -412,8 +441,8 @@ public class TerrainGenerator : MonoBehaviour
 			//			Color p1 = new Color (0, 1, 0, 0.5f);
 			//			Color p2 = new Color (0, 0, 1, 0.5f);
 			//			Color p3 = new Color (1, 0, 0, 0.5f);
-			Color c = new Color (1, 1, 1, 0.5f);
-
+			Color c = new Color (0.3f, 0.3f, 0.3f, 1f);
+			c = Color.black;
 
 
 			DrawLine (edge.ClippedEnds [LR.LEFT], edge.ClippedEnds [LR.RIGHT], tx, c);
@@ -483,6 +512,40 @@ public class TerrainGenerator : MonoBehaviour
 		voronoiTex = tx;
 		vdTex = tx;
 
+
+
+		// modify mat of terrain
+
+
+		// map to tex2d
+//		Texture2D mapTex = terrainMapTex;
+//		for (var x = 0; x < width; x++) {
+//			for (var y = 0; y < height; y++) {
+//
+//
+//				Color old = tx.GetPixel(x, y);
+//
+//
+//				if (old.grayscale >0){
+//					Color c =terrainMapTex.GetPixel (x, y);
+//					c.r *= (old.grayscale/2);
+//					c.g *= (old.grayscale/2);;
+//					c.b *= (old.grayscale/2);;
+//					c.a *= (old.grayscale/2);;
+//
+//					c = Color.black;
+//
+//					mapTex.SetPixel (x, y, c);
+//
+//				}
+//
+//
+//			
+//			}
+//		}
+//
+//		mapTex.Apply ();
+//		terrainMat.SetTexture ("_Ramp",mapTex);
 
 		// PROJECTOR
 
@@ -733,7 +796,7 @@ public class TerrainGenerator : MonoBehaviour
 
 
 	/* COPIED  */
-	private Texture2D Blur(Texture2D image, int blurSize)
+	public Texture2D Blur(Texture2D image, int blurSize)
 	{
 		Texture2D blurred = new Texture2D(image.width, image.height);
 

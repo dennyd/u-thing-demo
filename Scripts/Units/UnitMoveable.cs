@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
-
+using System.Collections;
+using System;
+using System.Collections.Generic;
 public class UnitMoveable : MonoBehaviour {
 
 
@@ -18,7 +20,10 @@ public class UnitMoveable : MonoBehaviour {
 
 	private float dist, time;
 	// Update is called once per frame
-	void FixedUpdate () {
+	void Update () {
+
+//		long t1 = System.DateTime.Now.Millisecond;
+
 		if (isMoving) {
 			if (Vector3.Distance(transform.position, vDestination) <= destinationTolerance) {
 				isMoving = false;
@@ -28,9 +33,9 @@ public class UnitMoveable : MonoBehaviour {
 				float fracJourney = distCovered / dist;
 				Vector3 v = Vector3.Lerp (transform.position, vDestination, fracJourney);
 				RaycastHit hit;
-				if (Physics.Raycast (v, Vector3.down, out hit, 5.0f)) {
-					v.y = hit.point.y + GetComponent<Collider>().bounds.extents.y;
-				}
+//				if (Physics.Raycast (v, Vector3.down, out hit, 5.0f)) {
+//					v.y = hit.point.y + GetComponent<Collider>().bounds.extents.y;
+//				}
 				animator.SetFloat ("Speed", movementSpeed);
 				transform.position = v;
 
@@ -61,6 +66,8 @@ public class UnitMoveable : MonoBehaviour {
 
 			}
 		}
+
+//		Debug.Log ("move script time: "+  (System.DateTime.Now.Millisecond-t1));
 	}
 
 	public void MoveTo(Vector3 vPoint) {
