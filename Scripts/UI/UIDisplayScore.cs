@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 public class UIDisplayScore : MonoBehaviour {
 	Text txt;
-
+	Text txtHealth;
 	int counter=0;
 	public Texture2D btnTexture;
 
@@ -26,14 +26,26 @@ public class UIDisplayScore : MonoBehaviour {
 		txt.text = "Captured territories: " +min+ "/" + max ;
 	}
 
+	public void displayHealth(int val){
+//		txt.text = "Health: " +min+ "/" + max ;
+	}
+
+	public void displayDamage(int val){
+		//		txt.text = "Health: " +min+ "/" + max ;
+	}
+
+	public void displayWin(){
+		//		txt.text = "Health: " +min+ "/" + max ;
+	}
+
 	void OnGUI() {
 
 
 
 		List<string> msgs = new List<string>();
-		msgs.Add ("Game objectives \n" +
-		"Capture all territories\n" +
-		"\tYou can capture territories by walking on it \n when it is not occupied by other player");
+		msgs.Add ("Game objectives: \n\n" +
+			"1) Capture all territories\n\n" +
+		"You can capture territories by walking on them\n when they are empty");
 		msgs.Add ("Units \n");
 
 		msgs.Add ("Unit controll \n"+
@@ -45,8 +57,10 @@ public class UIDisplayScore : MonoBehaviour {
 
 
 
+
+
 		if(counter<msgs.Count){
-			GUI.Box(new Rect(Screen.width/4,40,Screen.width/2,Screen.height/2),"Tutorial:\n" + msgs[counter]);
+			GUI.Box(new Rect(Screen.width/4,40,Screen.width/2,Screen.height/2),"" + msgs[counter]);
 
 			if (GUI.Button (new Rect (Screen.width/2-25, Screen.height/2+10, 50, 30), "Next")) {
 				counter++;
