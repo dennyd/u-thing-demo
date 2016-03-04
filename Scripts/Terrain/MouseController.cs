@@ -169,11 +169,27 @@ public class MouseController : MonoBehaviour
 	}
 
 	public void UpdateProjection(){
+		
+		//update text;
+
+
+
 		//		long t1 = System.DateTime.Now.Millisecond;
 		GameObject terrainGO = GameObject.FindGameObjectWithTag ("terrain");
 		TerrainGenerator tg = terrainGO.GetComponent<TerrainGenerator> ();
 		int width = tg.width;
 		int height = tg.height;
+
+		GameObject ui = GameObject.FindGameObjectWithTag ("ui");
+		UIDisplayScore score = ui.GetComponent <UIDisplayScore>();
+
+		int points=0;
+		for (int i = 0; i < tg.VoronoiPolygonNumber; i++) {
+			if(tg.regionToOwnerMap [i]==1){
+				points++;
+			}
+		}
+		score.displayScore (points,tg.VoronoiPolygonNumber);
 
 		GameObject p = GameObject.FindGameObjectWithTag ("projector");
 		Projector projector = p.GetComponent<Projector> ();
