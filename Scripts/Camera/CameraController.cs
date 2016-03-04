@@ -28,10 +28,10 @@ public class CameraController : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-
-		doTransforms ();
-		doRotates ();
-	
+		if(enabled){
+			doTransforms ();
+			doRotates ();
+		}	
 	}
 
 	private Vector3 mouseOrigin;
