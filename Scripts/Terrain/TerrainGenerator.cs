@@ -60,6 +60,11 @@ public class TerrainGenerator : MonoBehaviour
 	public int[,] pointToRegionMap;
 	public int[,] pointToOwnerMap;
 	public int[] regionToOwnerMap;
+
+
+	public Dictionary<int,List<Combat>> regionToUnitMap = new Dictionary<int, List<Combat>>();
+
+
 	public List<Vector2f> regionToSite;
 	public Texture2D vdTex;
 
@@ -67,9 +72,11 @@ public class TerrainGenerator : MonoBehaviour
 	Material terrainMat;
 	Texture2D terrainMapTex ;
 	void Start ()
-
-
 	{
+
+		for (int i = 0; i < VoronoiPolygonNumber; i++)
+			regionToUnitMap.Add (i, new List<Combat> ());
+
 
 		regionToOwnerMap = new int[VoronoiPolygonNumber];
 
@@ -442,7 +449,7 @@ public class TerrainGenerator : MonoBehaviour
 			//			Color p2 = new Color (0, 0, 1, 0.5f);
 			//			Color p3 = new Color (1, 0, 0, 0.5f);
 			Color c = new Color (0.3f, 0.3f, 0.3f, 1f);
-			c = Color.black;
+			c = Color.grey;
 
 
 			DrawLine (edge.ClippedEnds [LR.LEFT], edge.ClippedEnds [LR.RIGHT], tx, c);
